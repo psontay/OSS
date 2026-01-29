@@ -1,4 +1,5 @@
 from django.contrib.gis.db import models
+from .category import Category
 class Plant(models.Model):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=200)
@@ -7,6 +8,9 @@ class Plant(models.Model):
     location = models.PointField(srid=4326)
     min_temp = models.FloatField(default=20.0)
     max_temp = models.FloatField(default=35.0)
+
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='plants', blank=True, null=True)
+
     class Meta:
         ordering = ['-id']
     def __str__(self):
