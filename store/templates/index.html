@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Chào mừng đến với GreenShop - Nguyễn Lê Thịnh{% endblock %}
+
+{% block content %}
+<div class="text-center py-5 bg-white border shadow-sm mb-4">
+    <h1 class="display-4 fw-bold text-success">GreenShop & GIS</h1>
+    <p class="lead">Hệ thống ứng dụng công nghệ PostGIS để tìm kiếm cây cảnh phù hợp nhất với vùng đất của bạn.</p>
+    <hr class="my-4 mx-auto" style="width: 30%;">
+    <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+        <a href="{% url 'check_suitability' %}" class="btn btn-primary btn-lg px-4 gap-3">Thử nghiệm công cụ GIS</a>
+        <a href="{% url 'product_list' %}" class="btn btn-outline-success btn-lg px-4">Xem cửa hàng</a>
+    </div>
+</div>
+
+<div class="row text-center mt-5">
+    <div class="col-md-4">
+        <div class="p-3">
+            <h3 class="h5">Dữ liệu chính xác</h3>
+            <p class="small text-muted">Sử dụng dữ liệu thổ dưỡng thực tế từ cơ sở dữ liệu PostgreSQL.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="p-3">
+            <h3 class="h5">Phân tích không gian</h3>
+            <p class="small text-muted">Truy vấn tọa độ dựa trên hệ SRID 4326 chuẩn quốc tế.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="p-3">
+            <h3 class="h5">Hỗ trợ trồng trọt</h3>
+            <p class="small text-muted">Tư vấn độ pH phù hợp cho từng loại cây cảnh.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
