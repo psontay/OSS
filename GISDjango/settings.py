@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from decouple import config # Đảm bảo bạn đã pip install python-decouple
+from decouple import config
 
 # 1. ĐƯỜNG DẪN GỐC
 BASE_DIR = Path(__file__).resolve().parent.parent
