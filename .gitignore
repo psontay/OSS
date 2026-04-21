@@ -1,26 +1,20 @@
-# Python
 __pycache__/
 *.py[cod]
 *$py.class
 
-# Môi trường ảo (Quan trọng vì máy mỗi người mỗi khác)
 .venv/
 venv/
 ENV/
 node_modules/
-# Cấu hình cá nhân và Bảo mật (TUYỆT ĐỐI KHÔNG PUSH)
 .env
 
-# PyCharm (Cấu hình riêng của IDE)
 .idea/
 
-# Django
 db.sqlite3
 media/
 static_root/
 staticfiles/
 
-# Hệ điều hành
 .DS_Store
 Thumbs.db
 
