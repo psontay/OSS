@@ -1,6 +1,6 @@
-from GISDjango.controller.admin_forms import BranchForm
-from GISDjango.decorators import role_required
-from GISDjango.models import StoreBranch
+from OSS.controller.admin_forms import BranchForm
+from OSS.decorators import role_required
+from OSS.model import StoreBranch
 from django.shortcuts import render, get_object_or_404, redirect
 
 
