@@ -4,3 +4,5 @@ from .user import User
 from .plant import Plant
 from .store_branch import StoreBranch
 from .store_stock import StoreStock
+from .plant_img import PlantImage
+from .category import Category
