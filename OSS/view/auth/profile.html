@@ -1,0 +1,71 @@
+{% extends 'layouts/base.html' %} 
+{% block content %}
+<div class="container mx-auto px-4 py-12">
+  <div class="flex flex-wrap justify-center -mx-4">
+    <div class="w-full md:w-8/12 px-4">
+      <div class="block rounded-lg bg-white shadow-sm border border-neutral-100 overflow-hidden">
+        
+        <div class="bg-green-600 px-6 py-4 border-b border-green-700">
+          <h5 class="mb-0 text-white font-bold flex items-center gap-2">
+            <i class="bi bi-person-gear text-lg"></i> Hồ sơ cá nhân
+          </h5>
+        </div>
+        
+        <div class="p-6 md:p-8">
+          <form method="post">
+            {% csrf_token %}
+            
+            <div class="flex flex-wrap -mx-3 mb-4">
+              <div class="w-full md:w-1/2 px-3 mb-4 md:mb-0">
+                <label class="block mb-2 text-sm font-bold text-neutral-600">Họ</label>
+                {{ form.last_name }}
+              </div>
+              <div class="w-full md:w-1/2 px-3">
+                <label class="block mb-2 text-sm font-bold text-neutral-600">Tên</label>
+                {{ form.first_name }}
+              </div>
+            </div>
+            
+            <div class="mb-5">
+              <label class="block mb-2 text-sm font-bold text-neutral-600">Số điện thoại</label>
+              {{ form.phone_number }}
+            </div>
+            
+            <div class="mb-8">
+              <label class="block mb-2 text-sm font-bold text-neutral-600">Địa chỉ mặc định</label>
+              {{ form.address }}
+            </div>
+            
+            <div class="mt-4">
+              <button 
+                type="submit" 
+                class="inline-block w-full rounded bg-green-600 px-7 py-3 text-sm font-bold uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#16a34a] transition duration-150 ease-in-out hover:bg-green-700 hover:shadow-[0_8px_9px_-4px_rgba(22,163,74,0.3),0_4px_18px_0_rgba(22,163,74,0.2)] focus:bg-green-700 focus:shadow-[0_8px_9px_-4px_rgba(22,163,74,0.3),0_4px_18px_0_rgba(22,163,74,0.2)] focus:outline-none focus:ring-0 active:bg-green-800"
+              >
+                LƯU THAY ĐỔI
+              </button>
+            </div>
+          </form>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Tự động thêm class Tailwind/TW-Elements thay vì Bootstrap
+  document.addEventListener("DOMContentLoaded", function () {
+    var inputs = document.querySelectorAll("input, textarea");
+    var twClasses = [
+      "block", "w-full", "rounded", "border", "border-solid", "border-neutral-300", 
+      "bg-white", "px-3", "py-2", "text-base", "font-normal", "text-neutral-700", 
+      "outline-none", "transition", "duration-200", "ease-in-out", 
+      "focus:border-green-500", "focus:shadow-[inset_0_0_0_1px_rgb(22,163,74)]", "focus:outline-none"
+    ];
+    
+    inputs.forEach(function(el) {
+      el.classList.add(...twClasses);
+    });
+  });
+</script>
+{% endblock %}

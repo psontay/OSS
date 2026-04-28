@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Kiểm tra độ phù hợp - GIS Tool{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-7">
+        <div class="bg-white p-3 border shadow-sm">
+            <h5 class="mb-3 text-success">1. Chọn vị trí trên bản đồ</h5>
+            <div id="map"></div>
+            <div class="mt-3">
+                <label class="small fw-bold">Tọa độ đã chọn:</label>
+                <input type="text" id="coords" class="form-control form-control-sm" readonly>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="bg-white p-3 border shadow-sm h-100">
+            <h5 class="mb-3 text-success">2. Kết quả phân tích</h5>
+            <div id="analysis-result" class="p-3 border rounded bg-light text-center">
+                <p class="text-muted">Vui lòng click vào bản đồ để kiểm tra độ phù hợp của đất.</p>
+            </div>
+            
+            <div class="mt-4">
+                <h6>Cây cảnh đang kiểm tra:</h6>
+                <div class="p-2 border d-flex align-items-center bg-white">
+                    <img src="https://via.placeholder.com/50" class="me-2" alt="Kim Tien">
+                    <div>
+                        <strong>Cây Kim Tiền (ID: 1)</strong><br>
+                        <small>Yêu cầu pH: 5.5 - 7.0</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    var map = L.map('map').setView([10.7626, 106.6602], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    var marker;
+    map.on('click', function(e) {
+        if (marker) map.removeLayer(marker);
+        marker = L.marker(e.latlng).addTo(map);
+        document.getElementById('coords').value = e.latlng.lat.toFixed(6) + ", " + e.latlng.lng.toFixed(6);
+
+        let resultDiv = document.getElementById('analysis-result');
+        resultDiv.innerHTML = '<div class="spinner-border text-success" role="status"></div><p>Đang truy vấn PostGIS...</p>';
+
+        fetch(`/api/check/?lat=${e.latlng.lat}&lng=${e.latlng.lng}&plant_id=1`)
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    let color = data.suitable ? 'text-success' : 'text-danger';
+                    resultDiv.innerHTML = `
+                        <h4 class="${color}">${data.message}</h4>
+                        <p class="mb-0">Vùng đất: <b>${data.region}</b></p>
+                        <p>Độ pH đo được: <b>${data.ph}</b></p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<p class="text-warning">${data.message}</p>`;
+                }
+            });
+    });
+</script>
+{% endblock %}

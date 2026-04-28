@@ -1,0 +1,67 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Đơn hàng của tôi{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-2xl font-bold mb-6 text-neutral-800">Lịch sử đặt hàng</h2>
+    {% if messages %}
+    {% for message in messages %}
+    <div class="p-4 mb-4 text-sm font-bold rounded-lg
+            {% if message.tags == 'success' %} bg-green-100 text-green-700
+            {% else %} bg-red-100 text-red-700 {% endif %}">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="bg-white shadow-sm border border-neutral-100 rounded-lg overflow-hidden">
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-neutral-50 border-b border-neutral-100">
+            <tr>
+                <th class="px-6 py-4 text-sm font-bold text-neutral-600">Mã đơn</th>
+                <th class="px-6 py-4 text-sm font-bold text-neutral-600">Ngày đặt</th>
+                <th class="px-6 py-4 text-sm font-bold text-neutral-600">Tổng tiền</th>
+                <th class="px-6 py-4 text-sm font-bold text-neutral-600">Trạng thái</th>
+                <th class="px-6 py-4 text-sm font-bold text-neutral-600 text-center">Hành động</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for order in orders %}
+            <tr class="border-b border-neutral-50 hover:bg-neutral-50 transition-colors">
+                <td class="px-6 py-4 text-sm font-medium text-green-600">#{{ order.id }}</td>
+                <td class="px-6 py-4 text-sm text-neutral-600">{{ order.created_at|date:"d/m/Y H:i" }}</td>
+                <td class="px-6 py-4 text-sm font-bold text-neutral-800">{{ order.total_price|floatformat:0 }}đ</td>
+                <td class="px-6 py-4">
+            <span class="px-3 py-1 rounded-full text-xs font-bold
+                {% if order.status == 'pending' %} bg-yellow-100 text-yellow-700
+                {% elif order.status == 'delivered' %} bg-green-100 text-green-700
+                {% elif order.status == 'cancelled' %} bg-red-100 text-red-700
+                {% else %} bg-blue-100 text-blue-700 {% endif %}">
+                {{ order.get_status_display }}
+            </span>
+                </td>
+                <td class="px-6 py-4 text-center">
+                    <div class="flex justify-center gap-3">
+                        <a href="{% url 'order_detail' order.id %}" class="text-green-600 hover:text-green-800 text-sm font-bold transition">
+                            Chi tiết
+                        </a>
+
+                        {% if order.status == 'pending' %}
+                        <form action="{% url 'cancel_order' order.id %}" method="POST"
+                              onsubmit="return confirm('Tây ơi, ông chắc chắn muốn hủy đơn #{{ order.id }} không?');">
+                            {% csrf_token %}
+                            <button type="submit" class="text-red-500 hover:text-red-700 text-sm font-bold transition">
+                                Hủy đơn
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

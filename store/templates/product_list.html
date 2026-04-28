@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Cửa hàng cây cảnh - GreenShop{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-success">Danh mục cây cảnh</h2>
+        <a href="{% url 'check_suitability' %}" class="btn btn-warning shadow-sm">
+            <i class="bi bi-geo-alt"></i> Công cụ kiểm tra GIS
+        </a>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+        {% for plant in plants %}
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm card-plant">
+                <div class="bg-light text-center py-4" style="height: 150px;">
+                    <i class="display-1">🌿</i>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">{{ plant.name }}</h5>
+                    <p class="card-text text-muted small mb-2">
+                        <strong>pH phù hợp:</strong> {{ plant.min_ph }} - {{ plant.max_ph }}
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span class="text-primary fw-bold fs-5">{{ plant.price }}đ</span>
+                        <button class="btn btn-success btn-sm">Mua ngay</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <p class="text-muted">Hiện tại chưa có sản phẩm nào trong cửa hàng.</p>
+            <a href="/admin" class="btn btn-outline-secondary">Vào Admin thêm sản phẩm</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}  

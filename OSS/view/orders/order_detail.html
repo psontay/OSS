@@ -1,0 +1,79 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Chi tiết đơn hàng #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-neutral-800">Chi tiết đơn hàng #{{ order.id }}</h2>
+        <a href="{% url 'user_order_list' %}" class="text-green-600 hover:text-green-800 font-medium">
+            &larr; Quay lại danh sách
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white shadow-sm border border-neutral-100 rounded-lg overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-neutral-50 border-b border-neutral-100">
+                    <tr>
+                        <th class="px-6 py-4 text-sm font-bold text-neutral-600">Sản phẩm</th>
+                        <th class="px-6 py-4 text-sm font-bold text-neutral-600 text-center">Số lượng</th>
+                        <th class="px-6 py-4 text-sm font-bold text-neutral-600 text-right">Thành tiền</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in order.items.all %}
+                    <tr class="border-b border-neutral-50">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center space-x-4">
+                                {% if item.plant.image %}
+                                <img src="{{ item.plant.image.url }}" class="w-12 h-12 rounded object-cover">
+                                {% endif %}
+                                <span class="font-medium text-neutral-800">{{ item.plant.name }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-center text-neutral-600">x{{ item.quantity }}</td>
+                        <td class="px-6 py-4 text-right font-bold text-neutral-800">{{ item.get_subtotal|floatformat:0 }}đ</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <div class="p-6 bg-neutral-50 flex justify-end items-center space-x-4">
+                    <span class="text-neutral-600">Tổng thanh toán:</span>
+                    <span class="text-2xl font-bold text-red-600">{{ order.total_price|floatformat:0 }}đ</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <div class="bg-white p-6 shadow-sm border border-neutral-100 rounded-lg">
+                <h3 class="font-bold text-neutral-800 mb-4 border-b pb-2">Trạng thái</h3>
+                <div class="mb-4">
+                    <span class="px-3 py-1 rounded-full text-sm font-bold 
+                        {% if order.status == 'PENDING' %} bg-yellow-100 text-yellow-700
+                        {% elif order.status == 'CANCELLED' %} bg-red-100 text-red-700
+                        {% else %} bg-green-100 text-green-700 {% endif %}">
+                        {{ order.get_status_display }}
+                    </span>
+                </div>
+
+                {% if order.status == 'PENDING' %}
+                <form action="{% url 'cancel_order' order.id %}" method="POST" onsubmit="return confirm('Tây ơi, hủy đơn này là cây trả về kho đấy, chắc chưa?');">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg font-bold hover:bg-red-100 transition">
+                        Hủy đơn hàng này
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+
+            <div class="bg-white p-6 shadow-sm border border-neutral-100 rounded-lg">
+                <h3 class="font-bold text-neutral-800 mb-4 border-b pb-2">Thông tin giao hàng</h3>
+                <p class="text-sm text-neutral-600 mb-1"><strong>Người nhận:</strong> {{ order.full_name }}</p>
+                <p class="text-sm text-neutral-600 mb-1"><strong>SĐT:</strong> {{ order.phone }}</p>
+                <p class="text-sm text-neutral-600"><strong>Địa chỉ:</strong> {{ order.address }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

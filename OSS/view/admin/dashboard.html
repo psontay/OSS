@@ -1,0 +1,97 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block title %}Tổng quan - GIS Admin{% endblock %}
+
+{% block content %}
+<div class="pt-6 pb-4 border-b border-gray-300 mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 text-white">
+    
+    <div class="bg-blue-500 rounded-lg shadow-md p-6 flex flex-col items-center justify-center transition hover:bg-blue-600">
+        <div class="text-sm uppercase tracking-wide font-semibold mb-2">
+            <i class="bi bi-tree-fill mr-1"></i> Tổng Cây Cảnh
+        </div>
+        <h2 class="text-4xl font-bold">{{ total_plants|default:"0" }}</h2>
+    </div>
+    
+    <div class="bg-indigo-500 rounded-lg shadow-md p-6 flex flex-col items-center justify-center transition hover:bg-indigo-600">
+        <div class="text-sm uppercase tracking-wide font-semibold mb-2">
+            <i class="bi bi-tags-fill mr-1"></i> Danh Mục
+        </div>
+        <h2 class="text-4xl font-bold">{{ total_categories|default:"0" }}</h2>
+    </div>
+
+    <div class="bg-green-500 rounded-lg shadow-md p-6 flex flex-col items-center justify-center transition hover:bg-green-600">
+        <div class="text-sm uppercase tracking-wide font-semibold mb-2">
+            <i class="bi bi-cart-check-fill mr-1"></i> Đơn Hàng Mới
+        </div>
+        <h2 class="text-4xl font-bold">{{ total_orders|default:"0" }}</h2>
+    </div>
+
+    <div class="bg-yellow-500 rounded-lg shadow-md p-6 flex flex-col items-center justify-center transition hover:bg-yellow-600 text-gray-900">
+        <div class="text-sm uppercase tracking-wide font-semibold mb-2">
+            <i class="bi bi-shop mr-1"></i> Chi Nhánh
+        </div>
+        <h2 class="text-4xl font-bold">{{ total_branches|default:"0" }}</h2>
+    </div>
+
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-gray-800 text-white px-6 py-4 font-bold uppercase tracking-wider text-sm">
+            Cây cảnh mới thêm
+        </div>
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-gray-100 border-b border-gray-200">
+                    <th class="px-6 py-3 text-sm font-semibold text-gray-700">Tên cây</th>
+                    <th class="px-6 py-3 text-sm font-semibold text-gray-700">Giá</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for plant in recent_plants %}
+                <tr class="border-b border-gray-200 hover:bg-gray-50">
+                    <td class="px-6 py-3 font-medium">{{ plant.name }}</td>
+                    <td class="px-6 py-3 text-red-600">{{ plant.price }} đ</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="px-6 py-4 text-center text-gray-500">Chưa có dữ liệu</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-gray-800 text-white px-6 py-4 font-bold uppercase tracking-wider text-sm">
+            Đơn hàng gần đây
+        </div>
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-gray-100 border-b border-gray-200">
+                    <th class="px-6 py-3 text-sm font-semibold text-gray-700">Mã ĐH</th>
+                    <th class="px-6 py-3 text-sm font-semibold text-gray-700">Ngày tạo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in recent_orders %}
+                <tr class="border-b border-gray-200 hover:bg-gray-50">
+                    <td class="px-6 py-3 font-medium">#{{ order.id }}</td>
+                    <td class="px-6 py-3 text-gray-600">{{ order.created_at|date:"d/m/Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="px-6 py-4 text-center text-gray-500">Chưa có đơn hàng</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}
