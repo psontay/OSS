@@ -8,10 +8,10 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
 
-from OSS.model import User, PasswordResetOTP, RegistrationOTP
-from OSS.model.EmailChangeOTP import EmailChangeOTP
-from OSS.model.forms import UserUpdateForm
-from OSS.model.register import CustomUserRegistrationForm
+from OSS.models import User, PasswordResetOTP, RegistrationOTP
+from OSS.models.EmailChangeOTP import EmailChangeOTP
+from OSS.models.forms import UserUpdateForm
+from OSS.models.register import CustomUserRegistrationForm
 from django.contrib.auth import login
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm

@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from ..model.plant import Plant
+from ..models.plant import Plant
 import requests
 
 def suitability_page(request):

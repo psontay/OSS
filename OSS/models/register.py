@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from GISDjango.models import User
+from OSS.models import User
 
 class CustomUserRegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True, label="Email")

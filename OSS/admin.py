@@ -5,13 +5,13 @@ from django.db import transaction
 from django.db.models import ProtectedError
 from django.contrib.auth import update_session_auth_hash
 
-from .model import Plant, Category, Order, StoreBranch, StoreStock, User, PlantImage
+from .models import Plant, Category, Order, StoreBranch, StoreStock, User, PlantImage
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.gis.geos import Point
 
 from OSS.helper.forms_helper import get_model_fields_data, save_model_from_request
-from .model.forms import StoreStockForm
+from .models.forms import StoreStockForm
 
 import os
 from openpyxl import Workbook, load_workbook

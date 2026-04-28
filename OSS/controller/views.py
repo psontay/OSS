@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from OSS.helper.forms_helper import get_model_fields_data, save_model_from_request
-from OSS.model import Plant
+from OSS.models import Plant
 
 
 def test_form(request):
@@ -16,3 +16,7 @@ def test_form_save(request):
     return redirect("test_form")
 def aubout_us(request):
     return render(request, 'pages/about_us.html')
+
+def home(request):
+    # Bạn có thể đổi 'pages/home.html' thành file template trang chủ của bạn
+    return render(request, 'pages/home.html')

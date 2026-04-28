@@ -5,10 +5,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from django.conf import settings
 from django.db.models import Sum
-from ..model import StoreStock, StoreBranch
-from ..model.plant import Plant
+from ..models import StoreStock, StoreBranch
+from ..models.plant import Plant
 from django.contrib import messages
-from ..model import Order, OrderItem
+from ..models import Order, OrderItem
 from django.contrib.gis.measure import D
 from django.contrib.gis.db.models.functions import Distance
 from decimal import Decimal
@@ -105,7 +105,7 @@ def cart_remove(request, plant_id):
 
 
 from django.db import transaction
-from ..model import Order, OrderItem
+from ..models import Order, OrderItem
 
 @login_required
 def checkout(request):
