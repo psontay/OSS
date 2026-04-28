@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Đặt hàng thành công - GreenShop{% endblock %}
+
+{% block content %}
+<div class="container py-5 my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="mb-4">
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 6rem;"></i>
+            </div>
+            
+            <h1 class="fw-bold text-dark mb-3">Đặt hàng thành công!</h1>
+            <p class="text-muted fs-5 mb-4">
+                Cảm ơn ông đã tin tưởng GreenShop. Đơn hàng của ông đã được hệ thống ghi nhận và đang chờ chi nhánh gần nhất xử lý.
+            </p>
+
+            <div class="card border-0 bg-light p-4 mb-4 rounded-3">
+                <p class="mb-2">Mọi thông tin chi tiết về đơn hàng đã được gửi vào email của ông.</p>
+                <small class="text-secondary">
+                    <i class="bi bi-info-circle me-1"></i> 
+                    Ông có thể kiểm tra trạng thái vận chuyển trong phần <strong>Lịch sử đơn hàng</strong>.
+                </small>
+            </div>
+
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <a href="{% url 'product_list' %}" class="btn btn-outline-success btn-lg px-4 fw-bold">
+                    <i class="bi bi-arrow-left me-2"></i> Tiếp tục mua sắm
+                </a>
+                <a href="{% url 'order_list' %}" class="btn btn-success btn-lg px-4 fw-bold shadow-sm">
+                    Xem đơn hàng của tôi <i class="bi bi-chevron-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+<script>
+    window.onload = function() {
+        confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#198754', '#20c997', '#ffffff']
+        });
+    };
+</script>
+{% endblock %}

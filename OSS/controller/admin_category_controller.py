@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from ..models.category import Category
-from admin_forms import CategoryForm
-from GISDjango.decorators import role_required
+from OSS.models.category import Category  # Đổi từ ..models thành đường dẫn tuyệt đối cho chắc
+from OSS.models.forms import CategoryForm  # Kiểm tra lại tên file chứa CategoryForm của ông
+from OSS.decorators import role_required   # BẮT QUẢ TANG: Đổi GISDjango thành OSS
 
 @role_required(allowed_roles=['admin'])
 def category_list(request):

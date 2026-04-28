@@ -1,7 +1,7 @@
 from django import forms
 from django.db.models import Sum
 
-from OSS.model import User, StoreStock
+from OSS.models import User, StoreStock
 
 class UserUpdateForm(forms.ModelForm):
     class Meta:

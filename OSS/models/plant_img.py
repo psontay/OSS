@@ -1,5 +1,5 @@
 from django.db import models
-from ..model import Plant
+from ..models import Plant
 
 class PlantImage(models.Model):
 

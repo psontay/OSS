@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Thanh toán - GreenShop{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'product_list' %}" class="text-success text-decoration-none">Cửa hàng</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'cart_detail' %}" class="text-success text-decoration-none">Giỏ hàng</a></li>
+            <li class="breadcrumb-item active">Thanh toán</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-7">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-success text-white p-3">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-truck me-2"></i> Thông tin giao hàng</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{% url 'checkout' %}">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label fw-bold small text-secondary">Họ và tên người nhận</label>
+                                <input type="text" name="full_name" class="form-control form-control-lg fs-6" 
+                                       value="{{ default_name|default:'' }}" 
+                                       placeholder="Nhập tên người nhận hàng" required>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label class="form-label fw-bold small text-secondary">Số điện thoại liên hệ</label>
+                                <input type="text" name="phone" class="form-control form-control-lg fs-6" 
+                                       value="{{ default_phone|default:'' }}" 
+                                       placeholder="Số điện thoại dùng để nhận hàng" required>
+                            </div>
+
+                            <div class="col-12 mb-4">
+                                <label class="form-label fw-bold small text-secondary">Địa chỉ nhận hàng</label>
+                                <textarea name="address" class="form-control form-control-lg fs-6" rows="3" 
+                                          placeholder="Số nhà, tên đường, Phường/Xã, Quận/Huyện..." required>{{ default_address|default:'' }}</textarea>
+                                <div class="alert alert-info mt-2 py-2 small border-0 bg-light">
+                                    <i class="bi bi-geo-alt-fill text-success"></i> 
+                                    Hệ thống GIS sẽ tự động tính toán chi nhánh gần nhất dựa trên địa chỉ này.
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <h5 class="fw-bold mb-3">Phương thức thanh toán</h5>
+                        <div class="list-group">
+                            <label class="list-group-item d-flex gap-3 py-3 rounded-3 border mb-2">
+                                <input class="form-check-input flex-shrink-0" type="radio" name="payment_method" value="COD" checked>
+                                <span>
+                                    <strong class="d-block">Thanh toán khi nhận hàng (COD)</strong>
+                                </span>
+                            </label>
+                            <label class="list-group-item d-flex gap-3 py-3 rounded-3 border opacity-50">
+                                <input class="form-check-input flex-shrink-0" type="radio" name="payment_method" value="BANK" disabled>
+                                <span>
+                                    <strong class="d-block">Chuyển khoản ngân hàng (Đang bảo trì)</strong>
+                                    <small class="text-muted">Tính năng này sẽ được cập nhật ở phiên bản sau.</small>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-success btn-lg fw-bold py-3 shadow-sm">
+                                <i class="bi bi-bag-check-fill me-2"></i> XÁC NHẬN ĐẶT HÀNG
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="card border-0 shadow-sm rounded-3 sticky-top" style="top: 20px;">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4">Đơn hàng</h5>
+                    
+                    <div class="order-items mb-4" style="max-height: 400px; overflow-y: auto;">
+                        {% for item in cart_items %}
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="position-relative">
+                                    {% if item.plant.image %}
+                                        <img src="{{ item.plant.image.url }}" class="rounded border" style="width: 55px; height: 55px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="rounded border bg-light d-flex align-items-center justify-content-center" style="width: 55px; height: 55px;">
+                                            <i class="bi bi-tree text-success"></i>
+                                        </div>
+                                    {% endif %}
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary" style="font-size: 0.6rem;">
+                                        {{ item.quantity }}
+                                    </span>
+                                </div>
+                                <div class="ms-3">
+                                    <h6 class="mb-0 small fw-bold">{{ item.plant.name }}</h6>
+                                    <small class="text-muted">{{ item.plant.price|floatformat:0 }}đ / cây</small>
+                                </div>
+                            </div>
+                            <span class="fw-bold small">{{ item.subtotal|floatformat:0 }}đ</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="border-top pt-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Tạm tính:</span>
+                            <span>{{ total_price|floatformat:0 }}đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Phí vận chuyển:</span>
+                            <span class="text-success fw-bold">Miễn phí</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                            <span class="h5 fw-bold mb-0">Tổng cộng:</span>
+                            <span class="h4 fw-bold text-danger mb-0">{{ total_price|floatformat:0 }}đ</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-light rounded-3">
+                        <small class="text-muted">
+                            <i class="bi bi-shield-check me-1"></i> 
+                            Giao dịch được bảo mật tuyệt đối. Cam kết cây tươi xanh khi đến tay khách hàng.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}{% if branch %}Sửa Chi Nhánh{% else %}Thêm Chi Nhánh Mới{% endif %} - GIS Admin{% endblock %}
+
+{% block content %}
+<div class="pt-6 pb-4 border-b border-gray-300 mb-6 flex justify-between items-center">
+    <h1 class="text-3xl font-bold text-gray-800">
+        {% if branch %}Chỉnh sửa Chi nhánh: {{ branch.name }}{% else %}Thêm Chi Nhánh Mới{% endif %}
+    </h1>
+    <a href="{% url 'admin_branch_list' %}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition">
+        <i class="bi bi-arrow-left mr-2"></i> Quay lại
+    </a>
+</div>
+
+<form method="POST" enctype="multipart/form-data" class="bg-white rounded-lg shadow-md p-6 mb-8">
+    {% csrf_token %}
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <div class="space-y-4">
+            <h3 class="text-xl font-semibold border-b pb-2">Thông tin cơ bản</h3>
+            
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Tên chi nhánh *</label>
+                <input type="text" name="name" value="{{ branch.name|default:'' }}" required
+                       class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Số điện thoại *</label>
+                <input type="text" name="phone" value="{{ branch.phone|default:'' }}" required
+                       class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Địa chỉ văn bản *</label>
+                <input type="text" name="address" value="{{ branch.address|default:'' }}" required
+                       class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Bán kính giao hàng (m)</label>
+                    <input type="number" name="delivery_radius" value="{{ branch.delivery_radius|default:'5000' }}"
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Hình ảnh cửa hàng</label>
+                    <input type="file" name="image" accept="image/*"
+                           class="shadow appearance-none border rounded w-full py-1.5 px-3 text-gray-700 leading-tight">
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <h3 class="text-xl font-semibold border-b pb-2">Tọa độ Bản đồ (Click để chọn)</h3>
+            
+            <div class="grid grid-cols-2 gap-4 mb-2">
+                <div>
+                    <label class="block text-gray-700 text-xs font-bold mb-1">Vĩ độ (Latitude)</label>
+                    <input type="text" id="lat" name="lat" value="{{ branch.location.y|default:'' }}" readonly required
+                           class="bg-gray-100 border rounded w-full py-2 px-3 text-gray-700 text-sm cursor-not-allowed">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-xs font-bold mb-1">Kinh độ (Longitude)</label>
+                    <input type="text" id="lng" name="lng" value="{{ branch.location.x|default:'' }}" readonly required
+                           class="bg-gray-100 border rounded w-full py-2 px-3 text-gray-700 text-sm cursor-not-allowed">
+                </div>
+            </div>
+
+            <div id="adminMap" class="w-full h-80 rounded-lg shadow-inner border-2 border-gray-300 z-0"></div>
+            <p class="text-sm text-red-500 italic">* Vui lòng zoom và click vào bản đồ để xác định vị trí chính xác của cửa hàng.</p>
+        </div>
+    </div>
+
+    <div class="mt-8 pt-4 border-t flex justify-end">
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow transition">
+            <i class="bi bi-save mr-2"></i> {% if branch %}Cập nhật Chi nhánh{% else %}Lưu Chi Nhánh Mới{% endif %}
+        </button>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Khởi tạo tọa độ mặc định
+    var initialLat = parseFloat("{{ branch.location.y|default:'10.762622' }}");
+    var initialLng = parseFloat("{{ branch.location.x|default:'106.660172' }}");
+    var zoomLevel = "{{ branch|yesno:'16,12' }}"; 
+
+    // 2. Khởi tạo bản đồ
+    var map = L.map('adminMap').setView([initialLat, initialLng], parseInt(zoomLevel));
+
+    // 3. Load lớp bản đồ
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // 4. Tạo Marker (Ghim)
+    var marker;
+    var hasLocation = "{{ branch.location|yesno:'true,false' }}" === "true";
+    
+    // Nếu đã có tọa độ (chế độ Sửa), hiển thị marker ngay lập tức
+    if (hasLocation) {
+        marker = L.marker([initialLat, initialLng]).addTo(map);
+    }
+
+    // 5. Sự kiện khi click vào bản đồ
+    map.on('click', function(e) {
+        var clickedLat = e.latlng.lat;
+        var clickedLng = e.latlng.lng;
+
+        if (marker) {
+            marker.setLatLng(e.latlng);
+        } else {
+            marker = L.marker(e.latlng).addTo(map);
+        }
+
+        document.getElementById('lat').value = clickedLat.toFixed(6);
+        document.getElementById('lng').value = clickedLng.toFixed(6);
+    }); // <-- Dấu đóng của map.on
+}); // <-- Dấu đóng của document.addEventListener
+</script>
+{% endblock %}

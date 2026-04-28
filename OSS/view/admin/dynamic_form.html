@@ -1,0 +1,255 @@
+    {% extends 'admin/base_admin.html' %} 
+
+    {% block title %}{{ title }} - GIS Admin{% endblock %}
+
+    {% block content %}
+    <div class="pt-6 pb-4 border-b border-gray-300 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 flex items-center gap-2">
+            <i class="bi bi-journal-text"></i> {{ title }}
+        </h2>
+        <button type="button" onclick="history.back()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition w-full sm:w-auto text-center">
+            <i class="bi bi-arrow-left mr-2"></i> Quay lại
+        </button>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="bg-white p-4 sm:p-8 rounded-lg shadow-md border max-w-4xl mx-auto mb-8">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% for field in fields %}
+            <div class="{% if field.type == 'TextField' or field.type == 'PointField' %}md:col-span-2{% endif %}">
+
+                <!-- LABEL -->
+                {% if field.type != "BooleanField" %}
+                <label for="field_{{ field.name }}" class="block mb-2.5 text-sm font-medium text-heading">
+                    {{ field.kwargs.verbose_name|default:field.name }}
+                </label>
+                {% endif %}
+
+                <!-- INPUT TYPES -->
+                {% if field.type == "CharField" %}
+                    <input type="text" id="field_{{ field.name }}" name="{{ field.name }}"
+                        value="{{ field.kwargs.default|default_if_none:'' }}"
+                        placeholder="Nhập {{ field.name }}"
+                        class="form-input" required />
+
+                {% elif field.type == "TextField" %}
+                <textarea id="field_{{ field.name }}" name="{{ field.name }}" rows="6"
+                    class="form-input tinymce"
+                    placeholder="Nhập {{ field.name }}">{{ field.kwargs.default|default_if_none:'' }}</textarea>
+                            
+                {% elif field.type == "FloatField" or field.type == "DecimalField" or field.type == "IntegerField" %}
+                    <input type="number"
+                        step="{% if field.type == 'IntegerField' %}1{% else %}any{% endif %}"
+                        id="field_{{ field.name }}" name="{{ field.name }}"
+                        value="{{ field.kwargs.default|default_if_none:'' }}"
+                        class="form-input" required />
+
+                {% elif field.type == "BooleanField" %}
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="field_{{ field.name }}" name="{{ field.name }}"
+                            class="form-checkbox"
+                            {% if field.kwargs.default %}checked{% endif %}>
+                        <label for="field_{{ field.name }}" class="text-sm font-medium text-heading">
+                            {{ field.kwargs.verbose_name|default:"Kích hoạt" }}
+                        </label>
+                    </div>
+
+                {% elif field.type == "ForeignKey" %}
+                    <select id="field_{{ field.name }}" name="{{ field.name }}" class="form-input">
+                        <option value="">-- Chọn --</option>
+                        {% for opt in field.options %}
+                        <option value="{{ opt.id }}"
+                            {% if field.kwargs.default|stringformat:"s" == opt.id|stringformat:"s" %}selected{% endif %}>
+                            {{ opt }}
+                        </option>
+                        {% endfor %}
+                    </select>
+
+                {% elif field.type == "DateField" %}
+                    <div class="relative">
+                        <span class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                            📅
+                        </span>
+                        <input datepicker id="field_{{ field.name }}" name="{{ field.name }}"
+                            value="{{ field.kwargs.default|default_if_none:'' }}"
+                            class="form-input pl-9"
+                            placeholder="Chọn ngày">
+                    </div>
+
+
+                {% elif field.type == "PointField" %}
+                <div class="bg-gray-50 p-3 sm:p-4 rounded-md border border-gray-200">
+
+                    <div class="relative mb-4">
+                        <div class="flex flex-col sm:flex-row gap-2 items-stretch">
+                            <input type="text" id="search_address_{{ field.name }}"
+                                placeholder="Nhập địa chỉ cần tìm..."
+                                class="form-input flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 w-full transition">
+                            <button type="button" id="btn_search_{{ field.name }}"
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md shrink-0 transition duration-150 font-medium w-full sm:w-auto">
+                                Tìm
+                            </button>
+                        </div>
+
+                        <div id="suggestions_{{ field.name }}"
+                            class="absolute z-[60] bg-white border border-gray-300 w-full mt-1 rounded-md shadow-xl hidden max-h-60 overflow-y-auto left-0">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1">Vĩ độ (Latitude)</label>
+                            <input value="{{ field.kwargs.default|slice:':10' }}" type="number" readonly step="any" id="display_lat_{{ field.name }}" class="form-input w-full bg-gray-100 text-gray-600 px-3 py-2 border border-gray-300 rounded-md" placeholder="Latitude">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1">Kinh độ (Longitude)</label>
+                            <input value="{{ field.kwargs.default|slice:'11:' }}" type="number" readonly step="any" id="display_lng_{{ field.name }}" class="form-input w-full bg-gray-100 text-gray-600 px-3 py-2 border border-gray-300 rounded-md" placeholder="Longitude">
+                        </div>
+                    </div>
+
+                    <div id="map_{{ field.name }}" class="w-full h-64 sm:h-80 lg:h-96 mb-2 rounded-md border border-gray-300 z-10 relative"></div>
+
+                    <input value="{{ field.kwargs.default|default:'' }}" type="hidden" name="{{ field.name }}" id="id_{{ field.name }}">
+                </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        let latInput = document.getElementById("display_lat_{{ field.name }}");
+        let lngInput = document.getElementById("display_lng_{{ field.name }}");
+        let hiddenInput = document.getElementById("id_{{ field.name }}");
+        let searchInput = document.getElementById("search_address_{{ field.name }}");
+        let searchBtn = document.getElementById("btn_search_{{ field.name }}");
+        let suggestionBox = document.getElementById("suggestions_{{ field.name }}");
+
+        let debounceTimer;
+
+        let rawValue = hiddenInput.value;
+        let initialLat = 10.762622;
+        let initialLng = 106.660172;
+
+        if (rawValue && rawValue.includes(',')) {
+            let parts = rawValue.split(',');
+            initialLat = parseFloat(parts[0]);
+            initialLng = parseFloat(parts[1]);
+        }
+
+        const map = L.map('map_{{ field.name }}').setView([initialLat, initialLng], 12);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            maxZoom: 19
+        }).addTo(map);
+
+        let marker;
+
+        function updateLocation(lat, lng, fly = false) {
+            hiddenInput.value = `${lat},${lng}`;
+            latInput.value = lat.toFixed(6);
+            lngInput.value = lng.toFixed(6);
+
+            let pos = [lat, lng];
+
+            if (marker) marker.setLatLng(pos);
+            else marker = L.marker(pos).addTo(map);
+
+            if (fly) map.flyTo(pos, 16);
+        }
+        if (rawValue) {
+            updateLocation(initialLat, initialLng, false);
+        }
+
+        // click map
+        map.on('click', function (e) {
+            updateLocation(e.latlng.lat, e.latlng.lng);
+        });
+
+        // ===== SEARCH BUTTON =====
+        searchBtn.addEventListener("click", function () {
+            let addr = searchInput.value;
+            if (!addr) return;
+
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${addr}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        updateLocation(parseFloat(data[0].lat), parseFloat(data[0].lon), true);
+                    }
+                });
+        });
+
+        // ===== AUTOCOMPLETE =====
+        function debounce(callback, delay = 400) {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(callback, delay);
+        }
+
+        function renderSuggestions(data) {
+            suggestionBox.innerHTML = "";
+
+            if (data.length === 0) {
+                suggestionBox.classList.add("hidden");
+                return;
+            }
+
+            data.slice(0, 5).forEach(item => {
+                let div = document.createElement("div");
+                // Đã fix lỗi giao diện tràn viền và thêm border-b cho đẹp
+                div.className = "px-4 py-3 hover:bg-blue-50 cursor-pointer text-sm border-b border-gray-100 last:border-b-0 break-words transition-colors text-gray-700";
+                div.innerText = item.display_name;
+
+                div.onclick = () => {
+                    updateLocation(parseFloat(item.lat), parseFloat(item.lon), true);
+                    searchInput.value = item.display_name;
+                    suggestionBox.classList.add("hidden");
+                };
+
+                suggestionBox.appendChild(div);
+            });
+
+            suggestionBox.classList.remove("hidden");
+        }
+
+        searchInput.addEventListener("input", function () {
+            let query = this.value.trim();
+
+            if (query.length < 3) {
+                suggestionBox.classList.add("hidden");
+                return;
+            }
+
+            debounce(() => {
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`)
+                    .then(res => res.json())
+                    .then(data => renderSuggestions(data))
+                    .catch(() => suggestionBox.classList.add("hidden"));
+            });
+        });
+
+        // click ngoài → ẩn autocomplete
+        document.addEventListener("click", function (e) {
+            if (!suggestionBox.contains(e.target) && e.target !== searchInput) {
+                suggestionBox.classList.add("hidden");
+            }
+        });
+
+    });
+    </script>
+
+                {% elif field.type == "ImageField" %}
+                    <input type="file" name="images" multiple accept="image/*" class="form-input w-full border border-gray-300 rounded-md p-2">
+
+                {% else %}
+                    <input type="text" name="{{ field.name }}" class="form-input w-full border border-gray-300 rounded-md px-3 py-2 focus:ring focus:ring-blue-200 transition">
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-8 pt-4 border-t border-gray-200 flex justify-end">
+            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-2.5 rounded-md shadow transition duration-150 w-full sm:w-auto">
+                <i class="bi bi-save mr-2"></i> Lưu dữ liệu
+            </button>
+        </div>
+    </form> 
+    {% endblock %}

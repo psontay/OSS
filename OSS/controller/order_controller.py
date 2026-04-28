@@ -7,7 +7,7 @@ from django.conf import settings
 from django.views.decorators.http import require_POST
 from geopy import Nominatim
 from django.contrib.gis.db.models.functions import Distance
-from ..model import Order, OrderItem, Plant, StoreStock
+from ..models import Order, OrderItem, Plant, StoreStock
 from .cart_controller import Cart
 
 

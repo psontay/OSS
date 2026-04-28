@@ -1,0 +1,124 @@
+{% extends 'layouts/base.html' %} 
+{% load static %} 
+{% block title %}Đăng ký tài khoản - GreenShop{% endblock %} 
+
+{% block content %}
+<div class="container mx-auto px-4 py-12">
+  <div class="flex flex-wrap justify-center -mx-4">
+    <div class="w-full md:w-8/12 lg:w-6/12 xl:w-5/12 px-4">
+      <div class="block rounded-xl bg-white shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-neutral-100 overflow-hidden">
+        
+        <div class="bg-green-600 text-white text-center py-8">
+          <h3 class="font-bold text-2xl mb-1 flex justify-center items-center gap-2">
+            <i class="bi bi-person-plus-fill"></i> Đăng Ký
+          </h3>
+          <p class="text-sm mb-0 text-green-100">
+            Tạo tài khoản để mua sắm và theo dõi đơn hàng
+          </p>
+        </div>
+
+        <div class="p-6 md:p-10">
+          
+          {% if form.errors %}
+          <div class="mb-6 rounded-lg bg-red-50 p-4 text-sm text-red-700 border border-red-200 relative" role="alert">
+            <strong class="flex items-center gap-2 mb-2 text-red-800">
+              <i class="bi bi-exclamation-triangle-fill text-lg"></i> Có lỗi xảy ra:
+            </strong>
+            <ul class="mb-0 list-disc pl-5">
+              {% for field in form %} 
+                {% for error in field.errors %}
+                <li><span class="font-medium">{{ field.label }}:</span> {{ error }}</li>
+                {% endfor %} 
+              {% endfor %} 
+              {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          <form method="post" novalidate>
+            {% csrf_token %} 
+            
+            {% for field in form %}
+            <div class="mb-5">
+              <label class="block mb-2 text-sm font-bold text-neutral-600">
+                {{ field.label }}
+              </label>
+              
+              <div class="relative flex w-full flex-wrap items-stretch">
+                <span class="flex items-center whitespace-nowrap rounded-l border border-r-0 border-solid border-neutral-300 bg-neutral-50 px-3 py-[0.25rem] text-center text-base font-normal text-neutral-500">
+                  {% if field.name == 'username' %}<i class="bi bi-person"></i>{% endif %}
+                  {% if field.name == 'email' %}<i class="bi bi-envelope"></i>{% endif %}
+                  {% if field.name == 'phone_number' %}<i class="bi bi-telephone"></i>{% endif %}
+                  {% if 'password' in field.name %}<i class="bi bi-lock"></i>{% endif %}
+                  {% if field.name != 'username' and field.name != 'email' and field.name != 'phone_number' and 'password' not in field.name %}<i class="bi bi-pencil-square"></i>{% endif %}
+                </span>
+                
+                {{ field }}
+              </div>
+
+              {% if field.help_text %}
+              <div class="mt-1 text-xs text-neutral-500">
+                {{ field.help_text|safe }}
+              </div>
+              {% endif %}
+            </div>
+            {% endfor %}
+
+            <div class="mt-8">
+              <button
+                type="submit"
+                class="inline-block w-full rounded bg-green-600 px-7 py-3 text-base font-bold uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#16a34a] transition duration-150 ease-in-out hover:bg-green-700 hover:shadow-[0_8px_9px_-4px_rgba(22,163,74,0.3),0_4px_18px_0_rgba(22,163,74,0.2)] focus:bg-green-700 focus:outline-none focus:ring-0 active:bg-green-800 flex justify-center items-center gap-2"
+              >
+                <i class="bi bi-check2-circle text-lg"></i> TẠO TÀI KHOẢN
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="bg-neutral-50 text-center py-4 border-t border-neutral-100">
+          <span class="text-neutral-500 text-sm">Đã có tài khoản?</span>
+          <a
+            href="{% url 'login' %}"
+            class="text-green-600 font-bold hover:text-green-700 transition-colors ml-1"
+            >Đăng nhập ngay</a
+          >
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Script xử lý tự động inject class Tailwind cho input
+  document.addEventListener("DOMContentLoaded", function () {
+    var inputs = document.querySelectorAll("input, textarea, select");
+    
+    // Class cho Input Text/Password/Email/etc (kết hợp với Input Group)
+    var textClasses = [
+      "relative", "m-0", "block", "w-[1px]", "min-w-0", "flex-auto", 
+      "rounded-r", "border", "border-solid", "border-neutral-300", 
+      "bg-white", "px-3", "py-2", "text-base", "font-normal", "text-neutral-700", 
+      "outline-none", "transition", "duration-200", "ease-in-out", 
+      "focus:z-[3]", "focus:border-green-500", "focus:shadow-[inset_0_0_0_1px_rgb(22,163,74)]", 
+      "focus:outline-none", "border-l-0"
+    ];
+
+    // Class cho Checkbox (nếu form có)
+    var checkboxClasses = [
+      "h-4", "w-4", "rounded", "border-neutral-300", "text-green-600", "focus:ring-green-500"
+    ];
+
+    inputs.forEach(function (input) {
+      if (input.type !== "checkbox" && input.type !== "radio" && input.type !== "hidden") {
+        input.classList.add(...textClasses);
+      }
+      if (input.type === "checkbox") {
+        input.classList.add(...checkboxClasses);
+      }
+    });
+  });
+</script>
+{% endblock %}

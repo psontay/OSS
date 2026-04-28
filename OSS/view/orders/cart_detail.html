@@ -1,0 +1,166 @@
+{% extends 'layouts/base.html' %} 
+{% load static %} 
+{% block title %}Giỏ hàng của bạn - GreenShop{% endblock %} 
+
+{% block content %}
+<div class="container mx-auto px-4 mt-6">
+  <h2 class="mb-6 text-2xl md:text-3xl font-bold text-green-600 flex items-center gap-2">
+    <i class="bi bi-cart3"></i> Giỏ hàng của bạn
+  </h2>
+
+  {% if cart_items %}
+  <div class="flex flex-wrap -mx-4">
+    
+    <div class="w-full md:w-2/3 px-4 mb-6 md:mb-0">
+      <div class="block rounded-lg bg-white shadow-sm border border-neutral-100 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-left text-sm whitespace-nowrap">
+            <thead class="bg-neutral-50 font-medium border-b border-neutral-200 text-neutral-700">
+              <tr>
+                <th scope="col" class="px-6 py-4" style="width: 40%">Sản phẩm</th>
+                <th scope="col" class="px-6 py-4" style="width: 15%">Đơn giá</th>
+                <th scope="col" class="px-6 py-4" style="width: 20%">Số lượng</th>
+                <th scope="col" class="px-6 py-4" style="width: 15%">Thành tiền</th>
+                <th scope="col" class="px-6 py-4" style="width: 10%"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in cart_items %}
+              <tr class="border-b border-neutral-100 last:border-0 hover:bg-neutral-50 transition duration-150">
+                <td class="px-6 py-4 align-middle">
+                  <div class="flex items-center">
+                    {% if item.plant.image %}
+                    <img
+                      src="{{ item.plant.image.url }}"
+                      alt="{{ item.plant.name }}"
+                      class="rounded mr-4 object-cover"
+                      style="width: 60px; height: 60px;"
+                    />
+                    {% else %}
+                    <div
+                      class="bg-neutral-200 rounded mr-4 flex items-center justify-center"
+                      style="width: 60px; height: 60px"
+                    >
+                      <i class="bi bi-tree text-green-600 text-xl"></i>
+                    </div>
+                    {% endif %}
+                    <div>
+                      <h6 class="mb-0 font-bold text-base text-neutral-800">
+                        <a
+                          href="{% url 'product_detail' item.plant.id %}"
+                          class="hover:text-green-600 transition-colors duration-200"
+                          >{{ item.plant.name }}</a
+                        >
+                      </h6>
+                      <small class="text-neutral-500">Mã: #{{ item.plant.id }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 align-middle text-neutral-700">
+                  {{ item.plant.price|floatformat:0 }}đ
+                </td>
+                <td class="px-6 py-4 align-middle">
+                  <form
+                    action="{% url 'cart_add' item.plant.id %}"
+                    method="post"
+                    class="flex items-center"
+                  >
+                    {% csrf_token %}
+                    <input
+                      type="number"
+                      name="quantity"
+                      value="{{ item.quantity }}"
+                      min="1"
+                      class="block w-[70px] rounded border border-solid border-neutral-300 bg-white px-2 py-1 text-sm text-center text-neutral-700 outline-none transition duration-200 ease-in-out focus:border-green-500 focus:shadow-[inset_0_0_0_1px_rgb(34,197,94)] focus:outline-none"
+                      onchange="this.form.submit()"
+                    />
+                    <input type="hidden" name="override" value="True" />
+                  </form>
+                </td>
+                <td class="px-6 py-4 align-middle font-bold text-green-600">
+                  {{ item.subtotal|floatformat:0 }}đ
+                </td>
+                <td class="px-6 py-4 align-middle text-center">
+                  <a
+                    href="{% url 'cart_remove' item.plant.id %}"
+                    class="text-red-500 hover:text-red-700 transition duration-200 inline-block p-2"
+                    onclick="return confirm('Bạn có chắc muốn xóa cây {{ item.plant.name }} khỏi giỏ hàng?');"
+                  >
+                    <i class="bi bi-trash text-lg"></i>
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="mt-6">
+        <a 
+          href="{% url 'product_list' %}" 
+          class="inline-block rounded border-2 border-neutral-400 px-6 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-neutral-600 transition duration-150 ease-in-out hover:border-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 focus:border-neutral-500 focus:text-neutral-700 focus:outline-none focus:ring-0 active:border-neutral-600 active:text-neutral-800"
+        >
+          <i class="bi bi-arrow-left mr-1"></i> Tiếp tục mua sắm
+        </a>
+      </div>
+    </div>
+
+    <div class="w-full md:w-1/3 px-4">
+      <div class="block rounded-lg bg-neutral-50 border border-neutral-100 shadow-sm">
+        <div class="p-6">
+          <h5 class="text-xl font-bold mb-6 text-neutral-800">Tổng đơn hàng</h5>
+
+          <div class="flex justify-between mb-3 text-neutral-700">
+            <span>Tạm tính:</span>
+            <span class="font-bold">{{ total_price|floatformat:0 }}đ</span>
+          </div>
+          <div class="flex justify-between mb-5 text-neutral-700">
+            <span>Phí vận chuyển:</span>
+            <span class="text-green-600 font-medium">Miễn phí</span>
+          </div>
+
+          <hr class="my-4 border-neutral-200" />
+
+          <div class="flex justify-between items-center mb-6">
+            <span class="text-lg font-bold text-neutral-800">Tổng cộng:</span>
+            <span class="text-2xl font-bold text-red-600"
+              >{{ total_price|floatformat:0 }}đ</span
+            >
+          </div>
+
+          <div class="grid gap-3">
+            {% if user.is_authenticated %}
+            <a
+              href="{% url 'checkout' %}"
+              class="inline-block w-full rounded bg-green-600 px-7 pb-2.5 pt-3 text-sm font-bold uppercase leading-normal text-white text-center shadow-[0_4px_9px_-4px_#16a34a] transition duration-150 ease-in-out hover:bg-green-700 hover:shadow-[0_8px_9px_-4px_rgba(22,163,74,0.3),0_4px_18px_0_rgba(22,163,74,0.2)] focus:bg-green-700 focus:shadow-[0_8px_9px_-4px_rgba(22,163,74,0.3),0_4px_18px_0_rgba(22,163,74,0.2)] focus:outline-none focus:ring-0 active:bg-green-800"
+              >TIẾN HÀNH ĐẶT HÀNG</a
+            >
+            {% else %}
+            <a
+              href="{% url 'login' %}?next={% url 'cart_detail' %}"
+              class="inline-block w-full rounded bg-primary px-7 pb-2.5 pt-3 text-sm font-medium uppercase leading-normal text-white text-center shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700"
+              >ĐĂNG NHẬP ĐỂ MUA</a
+            >
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="text-center py-16 px-4 bg-white rounded-lg border border-neutral-100 shadow-sm mt-4">
+    <i class="bi bi-cart-x text-7xl text-neutral-300"></i>
+    <h4 class="mt-4 text-2xl font-medium text-neutral-600">Giỏ hàng của bạn đang trống</h4>
+    <p class="mb-8 text-neutral-500">Hãy chọn những cây cảnh ưng ý để thêm vào giỏ hàng nhé!</p>
+    <a 
+      href="{% url 'product_list' %}" 
+      class="inline-block rounded bg-green-600 px-7 pb-2.5 pt-3 text-sm font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#16a34a] transition duration-150 ease-in-out hover:bg-green-700 focus:bg-green-700 focus:outline-none active:bg-green-800"
+    >
+      <i class="bi bi-shop mr-2"></i> Đến cửa hàng ngay
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

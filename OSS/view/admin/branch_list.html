@@ -1,0 +1,63 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block title %}Quản lý Chi nhánh - GIS Admin{% endblock %}
+
+{% block content %}
+<div class="pt-6 pb-4 border-b border-gray-300 mb-6 flex justify-between items-center">
+    <h1 class="text-3xl font-bold text-gray-800">Chi nhánh Cửa hàng</h1>
+    
+    <a href="{% url 'branch_add' %}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded inline-flex items-center transition">
+        <i class="bi bi-plus-lg mr-2"></i> Thêm chi nhánh
+    </a>
+</div>
+
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-gray-800 text-white text-sm uppercase tracking-wider">
+                    <th class="px-6 py-4 font-semibold">Tên chi nhánh</th>
+                    <th class="px-6 py-4 font-semibold">Địa chỉ</th>
+                    <th class="px-6 py-4 font-semibold">Số điện thoại</th>
+                    <th class="px-6 py-4 font-semibold text-center">Hoạt động</th>
+                    <th class="px-6 py-4 font-semibold text-center">Hành động</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-700">
+                {% for branch in branches %}
+                <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 font-bold text-gray-800">{{ branch.name }}</td>
+                    <td class="px-6 py-4 text-sm">{{ branch.address }}</td>
+                    <td class="px-6 py-4">{{ branch.phone }}</td>
+                    <td class="px-6 py-4 text-center">
+                        {% if branch.is_active %}
+                            <i class="bi bi-check-circle-fill text-green-500 text-xl"></i>
+                        {% else %}
+                            <i class="bi bi-x-circle-fill text-red-500 text-xl"></i>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <div class="flex items-center justify-center space-x-2">
+                            <a href="{% url 'branch_edit' branch.id %}" class="text-blue-500 hover:text-blue-700 bg-blue-100 hover:bg-blue-200 p-2 rounded transition" title="Chỉnh sửa">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a href="{% url 'branch_delete' branch.id %}" 
+                               class="text-red-500 hover:text-red-700 bg-red-100 hover:bg-red-200 p-2 rounded transition"
+                               onclick="return confirm('Xóa chi nhánh này?');">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                        <i class="bi bi-shop text-4xl block mb-2"></i> Chưa có chi nhánh nào.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

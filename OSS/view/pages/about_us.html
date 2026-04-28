@@ -1,0 +1,128 @@
+{% extends 'layouts/base.html' %} 
+{% block title %}Về chúng tôi - Hệ sinh thái GreenShop{% endblock %} 
+
+{% block content %}
+<section class="relative bg-center bg-no-repeat bg-[url('https://images.unsplash.com/photo-1466692476877-3e11516eab75?q=80&w=2070&auto=format&fit=crop')] bg-gray-700 bg-blend-multiply rounded-3xl mx-4 mt-6 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent"></div>
+    <div class="px-4 mx-auto max-w-screen-xl text-center py-24 lg:py-32 relative z-10">
+        <span class="bg-green-100 text-green-800 text-sm font-medium me-2 px-3 py-1 rounded-full border border-green-400 mb-6 inline-block">Nông nghiệp thông minh x Dữ liệu không gian</span>
+        <h1 class="mb-6 text-4xl font-extrabold tracking-tight leading-tight text-white md:text-5xl lg:text-6xl break-words whitespace-normal text-balance">
+            Trồng cây không còn là <br class="hidden sm:block" /> trò chơi may rủi
+        </h1>
+        <p class="mb-8 text-lg font-normal text-gray-300 lg:text-xl sm:px-16 lg:px-48">
+            Chúng tôi tiên phong tích hợp công nghệ Hệ thống Thông tin Địa lý (GIS) để mang đến cho bạn giải pháp xanh hoàn hảo. Mỗi mầm cây được trao đi đều được tính toán chính xác để sinh trưởng tốt nhất tại khu vực của bạn.
+        </p>
+        <div class="flex flex-col space-y-4 sm:flex-row sm:justify-center sm:space-y-0">
+            <a href="{% url 'product_list' %}" class="inline-flex justify-center items-center py-3 px-6 text-base font-medium text-center text-white rounded-lg bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition duration-300">
+                <i class="bi bi-shop mr-2"></i> Khám phá cửa hàng
+            </a>
+            <a href="#gis-technology" class="inline-flex justify-center hover:text-gray-900 items-center py-3 px-6 sm:ms-4 text-base font-medium text-center text-white rounded-lg border border-white hover:bg-gray-100 focus:ring-4 focus:ring-gray-400 transition duration-300">
+                Tìm hiểu công nghệ
+            </a>  
+        </div>
+    </div>
+</section>
+
+<section class="bg-white py-16 antialiased">
+  <div class="max-w-screen-xl px-4 mx-auto lg:px-6">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+              <h2 class="mb-4 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">Câu chuyện của chúng tôi</h2>
+              <p class="mb-4 text-gray-600 sm:text-lg leading-relaxed">
+                  Bắt nguồn từ tình yêu thiên nhiên và sự thấu hiểu sâu sắc về khoa học dữ liệu, GreenShop được ra đời. Chúng tôi nhận ra rằng, hàng triệu cây xanh bị chết mỗi năm chỉ vì người mua không nắm rõ đặc tính thổ nhưỡng, độ pH, hay mức nhiệt độ tại chính nơi họ sinh sống.
+              </p>
+              <p class="mb-6 text-gray-600 sm:text-lg leading-relaxed">
+                  Thay vì chỉ bán cây, chúng tôi xây dựng một <strong>hệ sinh thái công nghệ</strong>. Bằng cách phân tích dữ liệu không gian, chúng tôi đóng vai trò là "bác sĩ sinh thái", tư vấn cho bạn chính xác loại cây nào sẽ phát triển mạnh mẽ nhất ở ban công, khu vườn hay văn phòng của bạn.
+              </p>
+              <ul class="space-y-3 list-none text-gray-600">
+                  <li class="flex items-center gap-3">
+                      <div class="flex justify-center items-center w-6 h-6 bg-green-100 rounded-full text-green-600"><i class="bi bi-check-lg"></i></div>
+                      <span class="font-medium text-gray-800">Dữ liệu thực tế, giải pháp thực tiễn.</span>
+                  </li>
+                  <li class="flex items-center gap-3">
+                      <div class="flex justify-center items-center w-6 h-6 bg-green-100 rounded-full text-green-600"><i class="bi bi-check-lg"></i></div>
+                      <span class="font-medium text-gray-800">Phủ xanh đô thị bằng tư duy khoa học.</span>
+                  </li>
+              </ul>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+              <img class="w-full rounded-2xl shadow-lg object-cover h-64" src="https://images.unsplash.com/photo-1585320806297-9794b3e4ce88?q=80&w=1932&auto=format&fit=crop" alt="Chăm sóc cây">
+              <img class="w-full rounded-2xl shadow-lg object-cover h-64 mt-8" src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop" alt="Dữ liệu không gian">
+          </div>
+      </div>
+  </div>
+</section>
+
+<section id="gis-technology" class="bg-neutral-50 py-16 border-y border-gray-200 antialiased">
+    <div class="max-w-screen-xl px-4 mx-auto lg:px-6">
+        <div class="text-center mb-12">
+            <h2 class="mb-4 text-3xl font-extrabold text-gray-900 md:text-4xl">Trải nghiệm mua sắm tích hợp GIS</h2>
+            <p class="text-gray-500 sm:text-xl max-w-2xl mx-auto">Không chỉ là thương mại điện tử, chúng tôi tích hợp bản đồ thông minh và thuật toán phân tích không gian để bảo vệ mầm xanh của bạn ngay từ lúc chọn mua.</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8">
+            <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm hover:shadow-xl transition-shadow duration-300">
+                <div class="flex justify-center items-center w-14 h-14 bg-teal-100 rounded-xl mb-6 shadow-inner text-teal-600 text-2xl">
+                    <i class="bi bi-layers-fill"></i>
+                </div>
+                <h3 class="mb-3 text-2xl font-bold text-gray-900">Phân tích mức độ phù hợp sinh thái</h3>
+                <p class="text-gray-600 mb-4 leading-relaxed">
+                    Hệ thống sẽ dựa vào tọa độ vị trí bạn muốn trồng cây để truy xuất các lớp dữ liệu môi trường (Nhiệt độ, Độ ẩm, Lượng mưa, và Độ pH đất). 
+                </p>
+                <div class="bg-neutral-50 p-4 rounded-lg border border-neutral-100 mb-4">
+                    <div class="flex items-center gap-2 mb-2 text-sm text-gray-700">
+                        <i class="bi bi-thermometer-half text-orange-500"></i> Đối chiếu nhiệt độ sinh trưởng
+                    </div>
+                    <div class="flex items-center gap-2 mb-2 text-sm text-gray-700">
+                        <i class="bi bi-droplet-half text-blue-500"></i> Phân tích tầng sinh thái đất (pH)
+                    </div>
+                    <div class="flex items-center gap-2 text-sm text-gray-700">
+                        <i class="bi bi-bar-chart-fill text-green-500"></i> Đưa ra tỷ lệ phần trăm (%) sống sót
+                    </div>
+                </div>
+                <p class="text-sm text-gray-500 italic">Được xử lý mạnh mẽ bởi nền tảng phân tích GeoDjango và thuật toán Machine Learning nội bộ.</p>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm hover:shadow-xl transition-shadow duration-300">
+                <div class="flex justify-center items-center w-14 h-14 bg-blue-100 rounded-xl mb-6 shadow-inner text-blue-600 text-2xl">
+                    <i class="bi bi-geo-alt-fill"></i>
+                </div>
+                <h3 class="mb-3 text-2xl font-bold text-gray-900">Mạng lưới kho hàng thông minh</h3>
+                <p class="text-gray-600 mb-4 leading-relaxed">
+                    Bạn không cần lo lắng về thời gian vận chuyển làm cây bị héo. Thuật toán định tuyến không gian sẽ quét qua toàn bộ mạng lưới chi nhánh của chúng tôi.
+                </p>
+                <div class="bg-neutral-50 p-4 rounded-lg border border-neutral-100 mb-4">
+                    <div class="flex items-center gap-2 mb-2 text-sm text-gray-700">
+                        <i class="bi bi-pin-map text-red-500"></i> Xác định vị trí người mua trên bản đồ
+                    </div>
+                    <div class="flex items-center gap-2 mb-2 text-sm text-gray-700">
+                        <i class="bi bi-search text-purple-500"></i> Tìm kiếm chi nhánh có sẵn hàng trong bán kính gần nhất
+                    </div>
+                    <div class="flex items-center gap-2 text-sm text-gray-700">
+                        <i class="bi bi-truck text-emerald-500"></i> Tối ưu lộ trình giao hàng, giảm sốc nhiệt cho cây
+                    </div>
+                </div>
+                <p class="text-sm text-gray-500 italic">Dữ liệu bản đồ được cập nhật theo thời gian thực (Real-time Stock Management).</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="bg-green-600 rounded-3xl mx-4 mb-12 my-12 overflow-hidden relative shadow-lg">
+    <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 20px 20px;"></div>
+    
+    <div class="py-8 px-4 mx-auto max-w-screen-xl sm:py-16 lg:px-6 relative z-10 text-center">
+        <h2 class="mb-4 text-3xl font-extrabold text-white md:text-4xl">Sẵn sàng để mang không gian xanh về nhà?</h2>
+        <p class="mb-6 text-green-100 text-lg md:text-xl font-light">Hãy để thuật toán của chúng tôi giúp bạn chọn đúng cái cây dành riêng cho mảnh đất của bạn.</p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4 mt-8">
+            <a href="{% url 'product_list' %}" class="text-green-700 bg-white hover:bg-gray-50 focus:ring-4 focus:ring-green-300 font-bold rounded-lg text-lg px-8 py-3.5 transition-transform hover:-translate-y-1 shadow-md">
+                Mua cây ngay
+            </a>
+            <a href="{% url 'store_map' %}" data-modal-target="map-demo-modal" data-modal-toggle="map-demo-modal" class="text-white border border-green-200 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-semibold rounded-lg text-lg px-8 py-3.5 transition-transform hover:-translate-y-1">
+                Xem bản đồ chi nhánh
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

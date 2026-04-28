@@ -1,0 +1,87 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block title %}Chi tiết Đơn hàng #{{ order.id }} - GIS Admin{% endblock %}
+
+{% block content %}
+<div class="pt-6 pb-4 border-b border-gray-300 mb-6 flex justify-between items-center">
+    <h1 class="text-3xl font-bold text-gray-800">Đơn hàng #{{ order.id }}</h1>
+    <a href="{% url 'admin_order_list' %}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition">
+        <i class="bi bi-arrow-left mr-2"></i> Quay lại
+    </a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <div class="lg:col-span-2 space-y-6">
+        
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="bg-gray-800 text-white px-6 py-4 font-bold uppercase tracking-wider text-sm">
+                Danh sách sản phẩm
+            </div>
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-100 border-b border-gray-200">
+                        <th class="px-6 py-3 text-sm font-semibold text-gray-700">Sản phẩm</th>
+                        <th class="px-6 py-3 text-sm font-semibold text-gray-700 text-center">Số lượng</th>
+                        <th class="px-6 py-3 text-sm font-semibold text-gray-700 text-right">Đơn giá</th>
+                        <th class="px-6 py-3 text-sm font-semibold text-gray-700 text-right">Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-700">
+                    {% for item in order.items.all %}
+                    <tr class="border-b border-gray-200">
+                        <td class="px-6 py-4 font-medium">{{ item.plant.name }}</td>
+                        <td class="px-6 py-4 text-center">{{ item.quantity }}</td>
+                        <td class="px-6 py-4 text-right">{{ item.price }} đ</td>
+                        <td class="px-6 py-4 text-right font-bold text-red-600">
+                            {% widthratio item.price 1 item.quantity %} đ
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Không tải được sản phẩm</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="bg-gray-50 px-6 py-4 text-right border-t">
+                <span class="text-gray-600 mr-4">Tổng cộng:</span>
+                <span class="text-2xl font-bold text-red-600">{{ order.total_price }} đ</span>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-bold border-b pb-2 mb-4">Thông tin giao hàng</h3>
+            <div class="grid grid-cols-2 gap-4 text-gray-700">
+                <div>
+                    <p class="mb-2"><span class="font-semibold text-gray-900">Khách hàng:</span> {{ order.customer_name|default:"Khách vãng lai" }}</p>
+                    <p class="mb-2"><span class="font-semibold text-gray-900">Số điện thoại:</span> {{ order.phone|default:"Chưa cập nhật" }}</p>
+                    <p class="mb-2"><span class="font-semibold text-gray-900">Email:</span> {{ order.email|default:"Chưa cập nhật" }}</p>
+                </div>
+                <div>
+                    <p class="mb-2"><span class="font-semibold text-gray-900">Địa chỉ:</span> {{ order.address_text|default:"Chưa cập nhật" }}</p>
+                    <p class="mb-2"><span class="font-semibold text-gray-900">Ngày đặt:</span> {{ order.created_at|date:"d/m/Y H:i" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="space-y-6">
+        <form method="POST" class="bg-white rounded-lg shadow-md p-6 border-t-4 border-blue-500">
+            {% csrf_token %}
+            <h3 class="text-lg font-bold mb-4">Cập nhật Trạng thái</h3>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Tình trạng đơn hàng</label>
+                <select name="status" class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                    <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Đang chờ</option>
+                    <option value="processing" {% if order.status == 'processing' %}selected{% endif %}>Đang xử lý</option>
+                    <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>Đang giao</option>
+                    <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Đã giao</option>
+                </select>
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition shadow">
+                <i class="bi bi-arrow-repeat mr-2"></i> Lưu Trạng Thái
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

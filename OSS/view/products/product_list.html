@@ -1,0 +1,110 @@
+{% extends 'layouts/base.html' %} 
+{% block content %}
+
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+
+  <div class="md:col-span-3">
+    {% include 'includes/sidebar.html' %}
+  </div>
+
+  <div class="md:col-span-9">
+
+    <h2 class="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
+      <i class="bi bi-flower1"></i>
+      Cửa hàng Cây cảnh
+    </h2>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for plant in page_obj %}
+
+      <div data-aos="fade-up" data-aos-duration="1{{plant.id}}00" class="bg-white rounded-2xl shadow hover:shadow-lg transition flex flex-col">
+
+        <div class="bg-green-50 flex items-center justify-center h-[180px]">
+          {% if plant.image %}
+          <img
+            src="{{ plant.image.url }}"
+            class="h-full w-full object-cover rounded-t-2xl"
+          />
+          {% else %}
+          <i class="bi bi-tree text-primary text-4xl"></i>
+          {% endif %}
+        </div>
+
+        <div class="p-4 flex flex-col flex-1">
+
+          <h6 class="font-bold text-primary">
+            {{ plant.name }}
+          </h6>
+
+          <p class="text-sm text-secondary/70 mb-2">
+            {{ plant.description|default:"Nhiệt độ phù hợp: "|truncatewords:10 }}
+            {% if not plant.description %}
+              {{ plant.min_temp }}°C – {{ plant.max_temp }}°C
+            {% endif %}
+          </p>
+
+          <div class="flex justify-between items-center mt-auto">
+            <span class="text-primary font-bold">
+              {{ plant.price|floatformat:0 }}đ
+            </span>
+            
+            {% if plant.is_in_stock %}
+              <a href="{% url 'product_detail' plant.id %}"
+                 class="px-3 py-1.5 rounded-lg bg-primary text-white text-sm hover:bg-green-700 transition">
+                Mua ngay
+              </a>
+            {% else %}
+              <span class="px-3 py-1.5 rounded-lg bg-red-100 text-red-600 text-sm font-bold border border-red-200">
+                Hết hàng
+              </span>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+
+      {% empty %}
+      <div class="col-span-full text-center py-10">
+        <p class="text-secondary/70">
+          Chưa có cây nào trong danh mục này.
+        </p>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <nav class="flex items-center justify-center space-x-2 mt-12 mb-8">
+
+      {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}{% if current_ph %}&ph={{ current_ph }}{% endif %}"
+         class="px-4 py-2 bg-white border border-neutral-300 rounded-lg text-neutral-600 hover:bg-green-50 hover:text-green-600 transition shadow-sm">
+        <i class="bi bi-arrow-left"></i>
+      </a>
+      {% endif %}
+
+      {% for num in page_obj.paginator.page_range %}
+      {% if page_obj.number == num %}
+      <span class="px-4 py-2 bg-green-600 border border-green-600 rounded-lg text-white font-bold shadow-md">
+                {{ num }}
+            </span>
+      {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+      <a href="?page={{ num }}{% if current_ph %}&ph={{ current_ph }}{% endif %}"
+         class="px-4 py-2 bg-white border border-neutral-300 rounded-lg text-neutral-600 hover:border-green-500 hover:text-green-600 transition">
+        {{ num }}
+      </a>
+      {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{% if current_ph %}&ph={{ current_ph }}{% endif %}"
+         class="px-4 py-2 bg-white border border-neutral-300 rounded-lg text-neutral-600 hover:bg-green-50 hover:text-green-600 transition shadow-sm">
+        <i class="bi bi-arrow-right"></i>
+      </a>
+      {% endif %}
+
+    </nav>
+    {% endif %}
+
+  </div> 
+</div> 
+{% endblock %}

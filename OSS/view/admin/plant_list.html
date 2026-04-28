@@ -1,0 +1,82 @@
+{% extends 'admin/base_admin.html' %} 
+
+{% block title %}Quản lý Cây cảnh - GIS Admin{% endblock %}
+
+{% block content %}
+<div class="pt-6 pb-4 border-b border-gray-300 mb-6 flex justify-between items-center">
+    <h1 class="text-3xl font-bold text-gray-800">Danh sách Cây cảnh</h1>
+    <a href="{% url 'plant_add' %}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded inline-flex items-center transition">
+        <i class="bi bi-plus-lg mr-2"></i> Thêm cây mới 
+    </a>
+</div>
+
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-gray-800 text-white text-sm uppercase tracking-wider">
+                    <th class="px-6 py-4 font-semibold text-center">ID</th>
+                    <th class="px-6 py-4 font-semibold">Hình ảnh</th>
+                    <th class="px-6 py-4 font-semibold">Tên cây</th>
+                    <th class="px-6 py-4 font-semibold">Giá bán</th>
+                    <th class="px-6 py-4 font-semibold text-center">Trạng thái</th>
+                    <th class="px-6 py-4 font-semibold text-center">Hành động</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-700">
+                {% for plant in plants %}
+                <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 font-medium text-gray-500 text-center">#{{ plant.id }}</td>
+                    <td class="px-6 py-4">
+                        {% if plant.image %}
+                            <img src="{{ plant.image.url }}" alt="{{ plant.name }}" class="w-16 h-16 object-cover rounded-md shadow-sm border border-gray-200">
+                        {% else %}
+                            <div class="w-16 h-16 bg-gray-100 rounded-md border border-gray-200 flex items-center justify-center text-gray-400">
+                                <i class="bi bi-image text-xl"></i>
+                            </div>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-gray-800">{{ plant.name }}</div>
+                        <div class="text-xs text-indigo-600 mt-1 uppercase">{{ plant.category.name|default:"Chưa có danh mục" }}</div>
+                    </td>
+                    <td class="px-6 py-4 font-bold text-red-600">{{ plant.price }} đ</td>
+
+                    <td class="px-6 py-4 text-center text-sm">
+                        {% if plant.is_in_stock %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            <span class="w-2 h-2 mr-1 bg-green-500 rounded-full"></span> Đang bán
+        </span>
+                        {% elif not plant.is_available %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+            <span class="w-2 h-2 mr-1 bg-gray-500 rounded-full"></span> Ngừng bán
+        </span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+            <span class="w-2 h-2 mr-1 bg-red-500 rounded-full"></span> Hết hàng
+        </span>
+                        {% endif %}
+                    </td>
+
+                    <td class="px-6 py-4 text-center">
+                        <div class="flex items-center justify-center space-x-2">
+                            <a href="{% url 'plant_edit' plant.id %}" class="text-blue-500 hover:text-blue-700 bg-blue-100 hover:bg-blue-200 p-2 rounded transition" title="Chỉnh sửa">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            {% include "includes/popup.html" with id=plant.id title="Bạn có chắc chắn muốn xóa?" message="Hành động này không thể hoàn tác!" url_name="delete_plant" url_args=plant.id %}               
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                        <i class="bi bi-inbox text-4xl block mb-2"></i>
+                        Chưa có dữ liệu cây cảnh nào. Hãy thêm mới!
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block title %}Quản lý Tài khoản - GIS Admin{% endblock %}
+
+{% block content %}
+<div class="pt-6 pb-4 border-b border-gray-300 mb-6 flex justify-between items-center">
+    <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-2">
+        <i class="bi bi-people"></i> Quản lý Tài khoản
+    </h1>
+    </div>
+
+<div class="bg-white rounded-lg shadow-md overflow-hidden font-sans">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-gray-800 text-white text-sm uppercase tracking-wider">
+                    <th class="px-6 py-4 font-semibold">Tài khoản</th>
+                    <th class="px-6 py-4 font-semibold">Họ & Tên</th>
+                    <th class="px-6 py-4 font-semibold">Liên hệ</th>
+                    <th class="px-6 py-4 font-semibold text-center">Phân quyền</th>
+                    <th class="px-6 py-4 font-semibold text-center">Trạng thái</th>
+                    <th class="px-6 py-4 font-semibold text-center w-48">Hành động</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-700">
+                {% for u in users %}
+                <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
+                    
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-gray-800 text-base">{{ u.username }}</div>
+                        <div class="text-xs text-gray-500 mt-1"><i class="bi bi-calendar3"></i> {{ u.date_joined|date:"d/m/Y" }}</div>
+                    </td>
+
+                    <td class="px-6 py-4 font-medium">
+                        {% if u.first_name or u.last_name %}
+                            {{ u.last_name }} {{ u.first_name }}
+                        {% else %}
+                            <span class="text-gray-400 italic">Chưa cập nhật</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="px-6 py-4">
+                        <div class="text-sm mb-1">
+                            <i class="bi bi-envelope text-gray-400 mr-1"></i> {{ u.email|default:"---" }}
+                        </div>
+                        <div class="text-sm">
+                            <i class="bi bi-telephone text-gray-400 mr-1"></i> {{ u.phone_number|default:"---" }}
+                        </div>
+                    </td>
+
+                    <td class="px-6 py-4 text-center">
+                        {% if u.role == 'admin' %}
+                            <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full font-bold text-xs">
+                                <i class="bi bi-shield-lock-fill"></i> Quản trị
+                            </span>
+                        {% else %}
+                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-bold text-xs">
+                                <i class="bi bi-person-fill"></i> Khách hàng
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td class="px-6 py-4 text-center">
+                        {% if u.is_active %}
+                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full font-bold text-xs">Hoạt động</span>
+                        {% else %}
+                            <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full font-bold text-xs">
+                                <i class="bi bi-lock-fill"></i> Bị khóa
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td class="px-6 py-4 text-center">
+                        <div class="flex items-center justify-center space-x-2">
+                            <a href="{% url 'user_edit' u.id %}" class="text-blue-500 hover:text-blue-700 bg-blue-100 hover:bg-blue-200 p-2 rounded transition" title="Cập nhật tài khoản">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            
+                            {% if request.user.id != u.id %}
+                                <a href="{% url 'user_delete' u.id %}" 
+                                   onclick="return confirm('Bạn có chắc chắn muốn {% if u.is_active %}KHÓA{% else %}MỞ KHÓA{% endif %} tài khoản {{ u.username }} này không?');" 
+                                   class="{% if u.is_active %}text-orange-500 hover:text-orange-700 bg-orange-100 hover:bg-orange-200{% else %}text-green-500 hover:text-green-700 bg-green-100 hover:bg-green-200{% endif %} p-2 rounded transition" 
+                                   title="Khóa/Mở khóa">
+                                    {% if u.is_active %}
+                                        <i class="bi bi-lock"></i>
+                                    {% else %}
+                                        <i class="bi bi-unlock"></i>
+                                    {% endif %}
+                                </a>
+                                
+                                <a href="{% url 'user_hard_delete' u.id %}" 
+                                onclick="return confirm('CẢNH BÁO: Xóa tài khoản này sẽ xóa VĨNH VIỄN khỏi hệ thống. Bạn có chắc chắn không?');" 
+                                class="text-red-500 hover:text-red-700 bg-red-100 hover:bg-red-200 p-2 rounded transition" 
+                                title="Xóa vĩnh viễn">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            {% else %}
+                                <button disabled class="text-gray-400 bg-gray-100 p-2 rounded cursor-not-allowed" title="Không thể khóa chính mình">
+                                    <i class="bi bi-lock-fill"></i>
+                                </button>
+                                <button disabled class="text-gray-400 bg-gray-100 p-2 rounded cursor-not-allowed" title="Không thể xóa chính mình">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                        <i class="bi bi-people text-4xl block mb-2"></i> Chưa có tài khoản nào.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -4,10 +4,10 @@ from django.db.models import Sum
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.contrib.gis.geos import Point
-from ..model.plant import Plant, SoilRegion
-from ..model.plant_img import PlantImage
+from ..models.plant import Plant, SoilRegion
+from ..models.plant_img import PlantImage
 from django.shortcuts import render
-from ..model import StoreBranch, StoreStock, Category
+from ..models import StoreBranch, StoreStock, Category
 from .cart_controller import Cart
 import json
 from django.core.paginator import Paginator

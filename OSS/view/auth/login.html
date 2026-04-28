@@ -1,0 +1,101 @@
+{% extends 'layouts/base.html' %} 
+{% load static %} 
+{% block title %}Đăng nhập - GreenShop{% endblock %} 
+
+{% block content %}
+<div class="container mx-auto px-4 py-12 mt-6">
+  <div class="flex flex-wrap justify-center -mx-4">
+    <div class="w-full md:w-6/12 lg:w-4/12 px-4">
+      <div class="block rounded-xl bg-white shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-neutral-100 overflow-hidden">
+        
+        <div class="p-6 md:p-10">
+          <div class="text-center mb-8">
+            <div
+              class="bg-green-600 text-white rounded-full inline-flex items-center justify-center mb-4 shadow-md"
+              style="width: 60px; height: 60px"
+            >
+              <i class="bi bi-lock-fill text-3xl"></i>
+            </div>
+            <h3 class="font-bold text-green-600 text-2xl mb-1">Đăng Nhập</h3>
+            <p class="text-neutral-500 text-sm">Chào mừng bạn quay trở lại!</p>
+          </div>
+
+          {% if form.errors %}
+          <div class="mb-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 flex items-center border border-red-200" role="alert">
+            <i class="bi bi-exclamation-circle-fill mr-2 text-lg"></i> 
+            <span>Tên đăng nhập hoặc mật khẩu không đúng.</span>
+          </div>
+          {% endif %}
+
+          <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-5">
+              <label class="block mb-2 text-sm font-bold text-neutral-600"
+                >Tên đăng nhập</label
+              >
+              <div class="relative flex w-full flex-wrap items-stretch">
+                <span class="flex items-center whitespace-nowrap rounded-l border border-r-0 border-solid border-neutral-300 bg-neutral-50 px-3 py-[0.25rem] text-center text-base font-normal text-neutral-500"
+                  ><i class="bi bi-person"></i
+                ></span>
+                {{ form.username }}
+              </div>
+            </div>
+            
+            <div class="mb-6">
+              <label class="block mb-2 text-sm font-bold text-neutral-600"
+                >Mật khẩu</label
+              >
+              <div class="relative flex w-full flex-wrap items-stretch">
+                <span class="flex items-center whitespace-nowrap rounded-l border border-r-0 border-solid border-neutral-300 bg-neutral-50 px-3 py-[0.25rem] text-center text-base font-normal text-neutral-500"
+                  ><i class="bi bi-key"></i
+                ></span>
+                {{ form.password }}
+              </div>
+            </div>
+
+            <div class="mt-8 mb-2">
+              <button
+                type="submit"
+                class="inline-block w-full rounded bg-green-600 px-7 py-3 text-sm font-bold uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#16a34a] transition duration-150 ease-in-out hover:bg-green-700 hover:shadow-[0_8px_9px_-4px_rgba(22,163,74,0.3),0_4px_18px_0_rgba(22,163,74,0.2)] focus:bg-green-700 focus:outline-none focus:ring-0 active:bg-green-800"
+              >
+                ĐĂNG NHẬP
+              </button>
+            </div>
+          </form>
+        </div>
+        
+        <div class="bg-neutral-50 text-center py-4 border-t border-neutral-100">
+          <span class="text-neutral-500 text-sm">Chưa có tài khoản?</span>
+          <a
+            href="{% url 'register' %}"
+            class="text-green-600 font-bold hover:text-green-700 transition-colors ml-1"
+            >Đăng ký mới</a
+          >
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Tự động thêm class Tailwind/TW-Elements cho các input render từ Django
+  document.addEventListener("DOMContentLoaded", function () {
+    var inputs = document.querySelectorAll("input[type='text'], input[type='password']");
+    var tailwindClasses = [
+      "relative", "m-0", "block", "w-[1px]", "min-w-0", "flex-auto", 
+      "rounded-r", "border", "border-solid", "border-neutral-300", 
+      "bg-white", "px-3", "py-2", "text-base", "font-normal", "text-neutral-700", 
+      "outline-none", "transition", "duration-200", "ease-in-out", 
+      "focus:z-[3]", "focus:border-green-500", "focus:shadow-[inset_0_0_0_1px_rgb(22,163,74)]", 
+      "focus:outline-none", "border-l-0" // border-l-0 để khớp nối mượt với icon bên trái
+    ];
+    
+    inputs.forEach(function (input) {
+      // Dùng spread operator để add hàng loạt class
+      input.classList.add(...tailwindClasses);
+    });
+  });
+</script>
+{% endblock %}
