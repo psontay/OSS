@@ -14,7 +14,7 @@ def test_form_save(request):
     instance.save()
 
     return redirect("test_form")
-def aubout_us(request):
+def about_us(request):
     return render(request, 'pages/about_us.html')
 
 def home(request):

@@ -17,7 +17,7 @@ from OSS import admin as custom_admin # Đổi từ GISDjango sang OSS
 urlpatterns = [
     # --- 1. GIAO DIỆN KHÁCH HÀNG (STORE FRONT) ---
     path('', store_controller.home, name='home'),
-    path('about-us/', views.aubout_us, name='about_us'),
+    path('about-us/', views.about_us, name='about_us'),
 
     # [Auth] Xác thực - Các tên name='login', 'register' ở đây sẽ fix lỗi NoReverseMatch
     path('register/', auth_controller.register_view, name='register'),
@@ -85,8 +85,8 @@ urlpatterns = [
     path('view/admin/users/edit/<int:pk>/', custom_admin.user_edit, name='user_edit'),
     path('view/admin/users/delete/<int:pk>/', custom_admin.user_delete, name='user_delete'),
     path('view/admin/users/hard-delete/<int:pk>/', custom_admin.user_delete, name='user_hard_delete'),
-    
-    #path('contact-test/', mail_controller.contact_us, name='contact_us'),
+    path('about-us/', views.about_us, name='about_us'),
+    path('contact-us/', views.about_us, name='contact_us')
 ]
 
 # Cấu hình file Media và Static cho môi trường Development
