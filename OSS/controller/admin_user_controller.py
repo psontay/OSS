@@ -1,15 +1,36 @@
-from ..decorators import role_required
-from ..model.user import User
-from django.shortcuts import render, get_object_or_404, redirect
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework import status
+from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAdminUser
 
-@role_required(allowed_roles=['admin'])
-def user_list(request):
-    items = User.objects.all()
-    return render(request, 'admin/user/list.html', {'items': items})
+from OSS.models import User
+from OSS.serializers import UserSerializer
 
-@role_required(allowed_roles=['admin'])
-def user_delete(request, pk):
+@api_view(['GET'])
+# @permission_classes([IsAdminUser])
+def user_list_api(request):
+    """Lấy danh sách tất cả người dùng"""
+    users = User.objects.all().order_by('-id')
+    serializer = UserSerializer(users, many=True)
+    return Response({
+        "status": "success",
+        "data": serializer.data
+    })
+
+@api_view(['DELETE'])
+# @permission_classes([IsAdminUser])
+def user_delete_api(request, pk):
+    """Xóa người dùng (không cho xóa superuser)"""
     user = get_object_or_404(User, pk=pk)
-    if not user.is_superuser:
-        user.delete()
-    return redirect('admin_user_list')
+    if user.is_superuser:
+        return Response({
+            "status": "error",
+            "message": "Không thể xóa tài khoản Quản trị tối cao!"
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    user.delete()
+    return Response({
+        "status": "success",
+        "message": f"Đã xóa người dùng {user.username} thành công!"
+    })

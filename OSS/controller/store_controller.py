@@ -1,129 +1,132 @@
-from unicodedata import category
-
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from django.shortcuts import get_object_or_404
 from django.db.models import Sum
-from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
 from django.contrib.gis.geos import Point
-from ..models.plant import Plant, SoilRegion
-from ..models.plant_img import PlantImage
-from django.shortcuts import render
-from ..models import StoreBranch, StoreStock, Category
-from .cart_controller import Cart
-import json
-from django.core.paginator import Paginator
+from rest_framework.pagination import PageNumberPagination
 
-def home(request):
-    plantsHot = Plant.objects.all()
-    return render(request, 'pages/home.html', {'plantsHot': plantsHot})
+from ..models import Plant, Category, StoreBranch, StoreStock, SoilRegion, PlantImage
+from ..serializers import PlantSerializer, CategorySerializer, BranchSerializer
 
+# --- PHÂN TRANG CUSTOM ---
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 6 # Giữ nguyên 6 cây mỗi trang như ông yêu cầu
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
-def product_list(request, category_slug=None):
-    cart = Cart(request)
-    total_items = len(cart)
-    categories = Category.objects.all()
+# --- API ENDPOINTS ---
+
+@api_view(['GET'])
+def home_api(request):
+    """API cho trang chủ: Lấy danh sách cây hot/mới nhất"""
+    plants = Plant.objects.all().order_by('-id')[:8]
+    serializer = PlantSerializer(plants, many=True, context={'request': request})
+    return Response({
+        "status": "success",
+        "data": serializer.data
+    })
+
+@api_view(['GET'])
+def product_list_api(request):
+    """
+    API Danh sách sản phẩm: Lọc theo Category, Branch, pH và có Phân trang
+    """
     plants = Plant.objects.all().order_by('-id')
-    selected_category = None
-    branches = StoreBranch.objects.filter(is_active=True)
-    selected_branch_id = request.GET.get('branch') # Lấy ID chi nhánh từ URL (?branch=1)
 
-    ph_value = request.GET.get('ph')
+    # 1. Lấy params từ URL
+    category_slug = request.query_params.get('category')
+    branch_id = request.query_params.get('branch')
+    ph_value = request.query_params.get('ph')
 
-    # 1. Lọc theo danh mục
+    # 2. Lọc theo Category
     if category_slug:
-        selected_category = get_object_or_404(Category, slug=category_slug)
-        plants = plants.filter(category=selected_category)
+        plants = plants.filter(category__slug=category_slug)
 
-    # 2. Lọc theo chi nhánh (QUAN TRỌNG)
-    if selected_branch_id:
-        # Lọc những cây có bản ghi StoreStock tại chi nhánh này và số lượng > 0
-        plants = plants.filter(
-            storestock__branch_id=selected_branch_id,
-            storestock__quantity__gt=0
-        ).distinct() # Dùng distinct để tránh bị lặp cây nếu dữ liệu lỗi
+    # 3. Lọc theo Chi nhánh (Còn hàng)
+    if branch_id:
+        plants = plants.filter(storestock__branch_id=branch_id, storestock__quantity__gt=0).distinct()
 
-    # 3. Logic lọc theo độ pH
+    # 4. Lọc theo độ pH
     if ph_value:
         try:
             ph_float = float(ph_value)
             plants = plants.filter(min_ph__lte=ph_float, max_ph__gte=ph_float)
         except ValueError:
-            ph_value = None
+            pass
 
-    # --- BẮT ĐẦU LOGIC PHÂN TRANG ---
-    # Mỗi trang hiện 9 cây (thường là 3x3 cho đẹp giao diện)
-    paginator = Paginator(plants, 6)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    # --------------------------------
+    # 5. Phân trang theo chuẩn DRF
+    paginator = StandardResultsSetPagination()
+    result_page = paginator.paginate_queryset(plants, request)
+    serializer = PlantSerializer(result_page, many=True, context={'request': request})
 
-    return render(request, 'products/product_list.html', {
-        'total_items': total_items,
-        'categories': categories,
-        'branches': branches,
-        'page_obj': page_obj,  # Dùng page_obj thay vì plants để loop ở template
-        'selected_category': selected_category,
-        'current_ph': ph_value
-    })
+    return paginator.get_paginated_response(serializer.data)
 
+@api_view(['GET'])
+def product_detail_api(request, pk):
+    """API Chi tiết sản phẩm: Trả về cả ảnh phụ và tồn kho"""
+    plant = get_object_or_404(Plant, id=pk)
 
-def product_detail(request, plant_id):
-    plant = get_object_or_404(Plant, id=plant_id)  # Debug: Kiểm tra dữ liệu ảnh
-    images = PlantImage.objects.filter(plant=plant)
-    # Lấy thông tin tồn kho chi tiết từng chi nhánh
+    # Lấy tồn kho thực tế
     stocks = StoreStock.objects.filter(plant=plant, quantity__gt=0)
-    # Tính tổng tồn kho
     total_stock = stocks.aggregate(Sum('quantity'))['quantity__sum'] or 0
 
-    return render(request, 'products/product_detail.html', {
-        'plant': plant,
-        'stocks': stocks,
-        'total_stock': total_stock,
-        'images': images
-    })
+    # Lấy danh sách ảnh phụ
+    images = PlantImage.objects.filter(plant=plant)
+    image_urls = [request.build_absolute_uri(img.image.url) for img in images if img.image]
 
-def suitability_page(request):
-    # Trả về trang có bản đồ Leaflet đã tách ra
-    return render(request, 'gis/check_suitability.html')
+    serializer = PlantSerializer(plant, context={'request': request})
 
-def check_suitability(request):
+    # Gộp thêm thông tin vào JSON trả về
+    data = serializer.data
+    data['total_stock'] = total_stock
+    data['sub_images'] = image_urls
+    data['stock_detail'] = [
+        {"branch_name": s.branch.name, "quantity": s.quantity} for s in stocks
+    ]
+
+    return Response({"status": "success", "data": data})
+
+@api_view(['GET'])
+def check_suitability_api(request):
+    """
+    GIS API: Kiểm tra cây có hợp với vùng đất (lat, lng) không
+    """
     try:
-        lat = float(request.GET.get('lat'))
-        lng = float(request.GET.get('lng'))
-        plant_id = request.GET.get('plant_id')
-        
+        lat = float(request.query_params.get('lat'))
+        lng = float(request.query_params.get('lng'))
+        plant_id = request.query_params.get('plant_id')
+
         user_location = Point(lng, lat, srid=4326)
         region = SoilRegion.objects.filter(geom__contains=user_location).first()
-        
+
         if region:
             plant = get_object_or_404(Plant, id=plant_id)
             suitable = plant.is_suitable(region.ph_level)
-            return JsonResponse({
+            return Response({
                 'status': 'success',
                 'region': region.name,
                 'ph': region.ph_level,
                 'suitable': suitable,
-                'message': "Đất phù hợp!" if suitable else "Đất không phù hợp."
+                'message': "Đất phù hợp!" if suitable else "Đất không phù hợp cho cây này."
             })
-        return JsonResponse({'status': 'error', 'message': 'Khu vực này chưa có dữ liệu đất.'})
+        return Response({'status': 'error', 'message': 'Khu vực này chưa có dữ liệu đất.'}, status=404)
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)})
+        return Response({'status': 'error', 'message': str(e)}, status=400)
 
-
-def store_locations_map(request):
+@api_view(['GET'])
+def store_locations_api(request):
+    """API trả về tọa độ các chi nhánh để vẽ lên bản đồ"""
     branches = StoreBranch.objects.filter(is_active=True)
-
-    branch_list = []
+    branch_data = []
     for b in branches:
         if b.location:
-            branch_list.append({
+            branch_data.append({
+                'id': b.id,
                 'name': b.name,
                 'address': b.address,
-                'phone': b.phone or "Liên hệ trực tiếp",
-                'opening_hours': b.opening_hours or "Đang cập nhật",
                 'lat': b.location.y,
                 'lng': b.location.x,
                 'radius': b.delivery_radius
             })
-    return render(request, 'gis/store_map.html', {
-        'branches_json': json.dumps(branch_list)
-    })
+    return Response({"status": "success", "data": branch_data})

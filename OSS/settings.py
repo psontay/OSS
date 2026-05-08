@@ -1,4 +1,6 @@
 import os
+from datetime import timedelta
+
 import environ
 from pathlib import Path
 
@@ -122,3 +124,17 @@ EMAIL_HOST_PASSWORD = 'bf6f68313ef7f5'
 EMAIL_PORT = 2525 
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'test@example.com'
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+# Cấu hình thời hạn của Token
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60), # Token có hiệu lực trong 1 tiếng
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    # Refresh token dùng được trong 1 ngày
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}

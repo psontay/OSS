@@ -1,19 +1,67 @@
-from OSS.controller.admin_forms import BranchForm
-from OSS.decorators import role_required
-from OSS.model import StoreBranch
-from django.shortcuts import render, get_object_or_404, redirect
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework import status
+from django.shortcuts import get_object_or_404
 
+from OSS.models import StoreBranch
+from OSS.serializers import BranchSerializer
+from rest_framework.permissions import IsAdminUser
 
-@role_required(allowed_roles=['admin'])
-def branch_list(request):
-    items = StoreBranch.objects.all()
-    return render(request, 'admin/branch/list.html', {'items': items})
+@api_view(['GET'])
+# @permission_classes([IsAdminUser]) # Mở ra khi bạn ông đã xử lý xong phần Token/Login
+def branch_list_api(request):
+    """Lấy danh sách tất cả chi nhánh"""
+    items = StoreBranch.objects.all().order_by('-id')
+    serializer = BranchSerializer(items, many=True)
+    return Response({
+        "status": "success",
+        "data": serializer.data
+    })
 
-@role_required(allowed_roles=['admin'])
-def branch_upsert(request, pk=None):
-    obj = get_object_or_404(StoreBranch, pk=pk) if pk else None
-    form = BranchForm(request.POST or None, request.FILES or None, instance=obj)
-    if form.is_valid():
-        form.save()
-        return redirect('admin_branch_list')
-    return render(request, 'admin/branch/form.html', {'form': form})
+@api_view(['POST'])
+def branch_create_api(request):
+    """Tạo mới chi nhánh"""
+    serializer = BranchSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({
+            "status": "success",
+            "message": "Tạo chi nhánh mới thành công!",
+            "data": serializer.data
+        }, status=status.HTTP_201_CREATED)
+
+    return Response({
+        "status": "error",
+        "errors": serializer.errors
+    }, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET', 'PUT', 'PATCH'])
+def branch_detail_api(request, pk):
+    """Xem chi tiết hoặc Cập nhật một chi nhánh cụ thể"""
+    obj = get_object_or_404(StoreBranch, pk=pk)
+
+    if request.method == 'GET':
+        serializer = BranchSerializer(obj)
+        return Response({"status": "success", "data": serializer.data})
+
+    # Cập nhật (PUT là thay hết, PATCH là thay một phần)
+    serializer = BranchSerializer(instance=obj, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({
+            "status": "success",
+            "message": "Cập nhật chi nhánh thành công!",
+            "data": serializer.data
+        })
+
+    return Response({"status": "error", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE'])
+def branch_delete_api(request, pk):
+    """Xóa chi nhánh"""
+    obj = get_object_or_404(StoreBranch, pk=pk)
+    obj.delete()
+    return Response({
+        "status": "success",
+        "message": f"Đã xóa chi nhánh {pk} thành công!"
+    }, status=status.HTTP_204_NO_CONTENT)

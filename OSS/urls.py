@@ -1,95 +1,96 @@
 from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
-from django.urls import path
+from django.urls import path, include
+from rest_framework_simplejwt.views import TokenRefreshView
 
-# Đã đổi từ GISDjango sang OSS
 from OSS.controller import (
     suitability_controller,
     store_controller,
     cart_controller,
     auth_controller,
-    order_controller, 
-    views
+    order_controller,
+    views,
+    admin_branch_controller,
+    admin_category_controller,
+    admin_controller,
+    admin_order_controller,
+    admin_plant_controller,
+    admin_stock_controller,
+    admin_user_controller # Nhớ import thêm cái này
 )
-from OSS import admin as custom_admin # Đổi từ GISDjango sang OSS
 
 urlpatterns = [
-    # --- 1. GIAO DIỆN KHÁCH HÀNG (STORE FRONT) ---
+    # --- 1. HỆ THỐNG MẶC ĐỊNH & LEGACY (Dành cho Web cũ hoặc Admin mặc định) ---
+    path('admin/', admin.site.urls),
     path('', store_controller.home, name='home'),
     path('about-us/', views.about_us, name='about_us'),
 
-    # [Auth] Xác thực - Các tên name='login', 'register' ở đây sẽ fix lỗi NoReverseMatch
-    path('register/', auth_controller.register_view, name='register'),
-    path('login/', auth_controller.login_view, name='login'),
-    path('logout/', auth_controller.logout_view, name='logout'),
-    path('profile/', auth_controller.profile_view, name='profile'),
+    # --- 2. API V1 (Dành cho bạn làm Frontend Framework - React/Vue/Mobile) ---
 
-    # [Products] Hiển thị sản phẩm
-    path('products/', store_controller.product_list, name='product_list'),
-    path('products/category/<slug:category_slug>/', store_controller.product_list, name='product_list_by_category'),
-    path('products/<int:plant_id>/', store_controller.product_detail, name='product_detail'),
+    # [Auth API - JWT]
+    path('api/v1/auth/register/', auth_controller.register_api, name='api_register'),
+    path('api/v1/auth/login/', auth_controller.login_api, name='api_login'),
+    path('api/v1/auth/token/refresh/', TokenRefreshView.as_view(), name='api_token_refresh'),
+    path('api/v1/auth/profile/', auth_controller.profile_api, name='api_profile'),
+    # Nếu ông có làm các API verify OTP thì thêm ở đây:
+    # path('api/v1/auth/verify-registration/', auth_controller.verify_registration_api, name='api_verify_reg'),
 
-    # [GIS] Phân tích không gian
-    path('check-suitability/', suitability_controller.suitability_page, name='check_suitability'),
-    path('api/check/', suitability_controller.check_suitability_api, name='api_check_suitability'),
-    path('store-map/', store_controller.store_locations_map, name='store_map'),
+    # [Store & Products API]
+    path('api/v1/home/', store_controller.home_api, name='api_home'),
+    path('api/v1/products/', store_controller.product_list_api, name='api_products'),
+    path('api/v1/products/<int:pk>/', store_controller.product_detail_api, name='api_product_detail'),
+    path('api/v1/categories/', admin_category_controller.category_list_api, name='api_public_categories'),
 
-    # [Orders/Cart] Giỏ hàng & Đơn hàng của khách
-    path('cart/', cart_controller.cart_detail, name='cart_detail'),
-    path('cart/add/<int:plant_id>/', cart_controller.cart_add, name='cart_add'),
-    path('cart/remove/<int:plant_id>/', cart_controller.cart_remove, name='cart_remove'),
-    path('cart/checkout/', cart_controller.checkout, name='checkout'),
-    path('order-success/', cart_controller.order_success_view, name='order_success'),
-    path('my-orders/', cart_controller.user_order_list, name='user_order_list'),
-    path('my-orders/<int:order_id>/', cart_controller.user_order_detail, name='order_detail'),
-    path('my-orders/cancel/<int:order_id>/', order_controller.cancel_order, name='cancel_order'),
+    # [GIS API]
+    path('api/v1/gis/check-suitability/', suitability_controller.check_suitability_api, name='api_check_env'),
+    path('api/v1/gis/store-locations/', store_controller.store_locations_api, name='api_store_locations'),
 
-    # --- 2. HỆ THỐNG MẶC ĐỊNH (Django Admin) ---
-    path('admin/', admin.site.urls),
+    # [Customer Orders API]
+    path('api/v1/orders/checkout/', order_controller.api_checkout, name='api_checkout'), # Thống nhất dùng cái này
+    path('api/v1/orders/history/', order_controller.api_order_list, name='api_order_list'),
+    path('api/v1/orders/<int:pk>/', order_controller.api_order_detail, name='api_order_detail'),
+    path('api/v1/orders/<int:pk>/cancel/', order_controller.api_cancel_order, name='api_cancel_order'),
 
-    # --- 3. HỆ THỐNG QUẢN TRỊ RIÊNG (CUSTOM ADMIN TAILWIND) ---
-    path('view/admin/dashboard/', custom_admin.dashboard, name='admin_dashboard'),
+    # --- 3. ADMIN API (Dành cho giao diện quản trị mới) ---
 
-    # Quản lý Danh mục
-    path('view/admin/categories/', custom_admin.category_management, name='admin_category_list'),
-    path('view/admin/categories/add/', custom_admin.category_edit, name='category_add'),
-    path('view/admin/categories/edit/<int:pk>/', custom_admin.category_edit, name='category_edit'),
-    path('view/admin/categories/delete/<int:pk>/', custom_admin.category_delete, name='category_delete'),
+    path('api/v1/admin/dashboard/', admin_controller.dashboard_api, name='api_admin_dashboard'),
 
-    # Quản lý Cây cảnh
-    path('view/admin/plants/', custom_admin.plant_management, name='admin_plant_list'),
-    path('view/admin/plants/add/', custom_admin.plant_edit, name='plant_add'),
-    path('view/admin/plants/edit/<int:pk>/', custom_admin.plant_edit, name='plant_edit'),
-    path('view/admin/plants/delete/<int:pk>/', custom_admin.delete_plant, name='delete_plant'),
+    # Admin - Quản lý Danh mục
+    path('api/v1/admin/categories/', admin_category_controller.category_list_api, name='api_admin_category_list'),
+    path('api/v1/admin/categories/create/', admin_category_controller.category_create_api, name='api_admin_category_create'),
+    path('api/v1/admin/categories/<int:pk>/', admin_category_controller.category_detail_api, name='api_admin_category_detail'),
+    path('api/v1/admin/categories/<int:pk>/delete/', admin_category_controller.category_delete_api, name='api_admin_category_delete'),
 
-    # Quản lý Đơn hàng
-    path('view/admin/orders/', custom_admin.order_management, name='admin_order_list'),
-    path('view/admin/orders/<int:pk>/', custom_admin.order_detail, name='admin_order_detail'),
+    # Admin - Quản lý Cây cảnh
+    path('api/v1/admin/plants/', admin_plant_controller.plant_list_api, name='api_admin_plant_list'),
+    path('api/v1/admin/plants/create/', admin_plant_controller.plant_create_api, name='api_admin_plant_create'),
+    path('api/v1/admin/plants/<int:pk>/', admin_plant_controller.plant_detail_api, name='api_admin_plant_detail'),
+    path('api/v1/admin/plants/<int:pk>/delete/', admin_plant_controller.plant_delete_api, name='api_admin_plant_delete'),
 
-    # Quản lý Tồn kho
-    path('view/admin/stocks/', custom_admin.stock_management, name='admin_stock_list'),
-    path('view/admin/stocks/add/', custom_admin.stock_edit, name='stock_add'),
-    path('view/admin/stocks/edit/<int:pk>/', custom_admin.stock_edit, name='stock_edit'),
-    path('view/admin/stocks/delete/<int:pk>/', custom_admin.stock_delete, name='stock_delete'),
+    # Admin - Quản lý Đơn hàng
+    path('api/v1/admin/orders/', admin_order_controller.order_list_api, name='api_admin_order_list'),
+    path('api/v1/admin/orders/<int:pk>/', admin_order_controller.order_detail_api, name='api_admin_order_detail'),
+    path('api/v1/admin/orders/<int:pk>/update-status/', admin_order_controller.order_update_status_api, name='api_admin_order_update'),
 
-    # Quản lý Chi nhánh (GIS)
-    path('view/admin/branches/', custom_admin.branch_management, name='admin_branch_list'),
-    path('view/admin/branches/add/', custom_admin.branch_edit, name='branch_add'),
-    path('view/admin/branches/edit/<int:pk>/', custom_admin.branch_edit, name='branch_edit'),
-    path('view/admin/branches/delete/<int:pk>/', custom_admin.branch_delete, name='branch_delete'),
+    # Admin - Quản lý Tồn kho
+    path('api/v1/admin/stocks/', admin_stock_controller.stock_list_api, name='api_admin_stock_list'),
+    path('api/v1/admin/stocks/create/', admin_stock_controller.stock_create_api, name='api_admin_stock_create'),
+    path('api/v1/admin/stocks/<int:pk>/', admin_stock_controller.stock_detail_api, name='api_admin_stock_detail'),
+    path('api/v1/admin/stocks/<int:pk>/delete/', admin_stock_controller.stock_delete_api, name='api_admin_stock_delete'),
 
-    # Quản lý tài khoản user
-    path('view/admin/users/', custom_admin.user_management, name='admin_user_list'),
-    path('view/admin/users/add/', custom_admin.user_edit, name='user_add'),
-    path('view/admin/users/edit/<int:pk>/', custom_admin.user_edit, name='user_edit'),
-    path('view/admin/users/delete/<int:pk>/', custom_admin.user_delete, name='user_delete'),
-    path('view/admin/users/hard-delete/<int:pk>/', custom_admin.user_delete, name='user_hard_delete'),
-    path('about-us/', views.about_us, name='about_us'),
-    path('contact-us/', views.about_us, name='contact_us')
+    # Admin - Quản lý Chi nhánh
+    path('api/v1/admin/branches/', admin_branch_controller.branch_list_api, name='api_admin_branch_list'),
+    path('api/v1/admin/branches/create/', admin_branch_controller.branch_create_api, name='api_admin_branch_create'),
+    path('api/v1/admin/branches/<int:pk>/', admin_branch_controller.branch_detail_api, name='api_admin_branch_detail'),
+    path('api/v1/admin/branches/<int:pk>/delete/', admin_branch_controller.branch_delete_api, name='api_admin_branch_delete'),
+
+    # Admin - Quản lý User (Đã chuyển sang API)
+    path('api/v1/admin/users/', admin_user_controller.user_list_api, name='api_admin_user_list'),
+    path('api/v1/admin/users/<int:pk>/delete/', admin_user_controller.user_delete_api, name='api_admin_user_delete'),
 ]
 
-# Cấu hình file Media và Static cho môi trường Development
+# Cấu hình file Media và Static
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
