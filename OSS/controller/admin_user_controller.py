@@ -10,6 +10,8 @@ from OSS.serializers import UserSerializer
 @api_view(['GET'])
 # @permission_classes([IsAdminUser])
 def user_list_api(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return Response({"status": "error", "message": "Permission denied. Admin access required."}, status=status.HTTP_403_FORBIDDEN)
     """Lấy danh sách tất cả người dùng"""
     users = User.objects.all().order_by('-id')
     serializer = UserSerializer(users, many=True)
@@ -21,6 +23,8 @@ def user_list_api(request):
 @api_view(['DELETE'])
 # @permission_classes([IsAdminUser])
 def user_delete_api(request, pk):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return Response({"status": "error", "message": "Permission denied. Admin access required."}, status=status.HTTP_403_FORBIDDEN)
     """Xóa người dùng (không cho xóa superuser)"""
     user = get_object_or_404(User, pk=pk)
     if user.is_superuser:

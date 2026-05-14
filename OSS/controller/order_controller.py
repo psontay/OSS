@@ -13,14 +13,28 @@ from ..serializers import OrderSerializer
 
 # --- HÀM UTILS (GIỮ NGUYÊN LOGIC GIS) ---
 def get_coords_from_address(address_str):
+    """Thử geocode địa chỉ. Trả về Point nếu thành công, None nếu thất bại."""
     try:
-        geolocator = Nominatim(user_agent="green_shop_gis")
+        geolocator = Nominatim(user_agent="green_shop_gis", timeout=5)
+        # Thử địa chỉ đầy đủ trước
         location = geolocator.geocode(address_str + ", Việt Nam")
         if location:
             return Point(location.longitude, location.latitude, srid=4326)
+        # Fallback: chỉ lấy phần thành phố/tỉnh (chuỗi cuối cùng sau dấu phẩy)
+        parts = [p.strip() for p in address_str.split(',')]
+        if len(parts) > 1:
+            # Thử với 2 phần cuối
+            short_addr = ', '.join(parts[-2:])
+            location = geolocator.geocode(short_addr + ", Việt Nam")
+            if location:
+                return Point(location.longitude, location.latitude, srid=4326)
+        return None
     except Exception as e:
         print(f"Lỗi Geocoding: {e}")
     return None
+
+# Tọa độ mặc định cho TP. Hồ Chí Minh khi không geocode được
+DEFAULT_LOCATION = Point(106.660172, 10.762622, srid=4326)
 
 # --- API ENDPOINTS ---
 
@@ -38,10 +52,22 @@ def api_checkout(request):
     if not items_input:
         return Response({"message": "Giỏ hàng trống!"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # 1. Chuyển địa chỉ sang tọa độ GIS
-    user_location = get_coords_from_address(address)
+    # 1. Xác định tọa độ GIS (ưu tiên location_coord từ frontend, fallback: geocode)
+    user_location = None
+    location_coord = data.get('location_coord', '')
+    if location_coord:
+        try:
+            lat, lng = map(float, location_coord.split(','))
+            user_location = Point(lng, lat, srid=4326)
+        except Exception:
+            pass  # fallback to geocoding
+    
     if not user_location:
-        return Response({"message": "Không thể xác định vị trí từ địa chỉ này."}, status=status.HTTP_400_BAD_REQUEST)
+        user_location = get_coords_from_address(address)
+    
+    if not user_location:
+        # Dùng tọa độ mặc định TP. Hồ Chí Minh nếu không geocode được
+        user_location = DEFAULT_LOCATION
 
     try:
         with transaction.atomic():
@@ -51,6 +77,7 @@ def api_checkout(request):
                 full_name=data.get('full_name'),
                 phone=data.get('phone'),
                 address=address,
+                delivery_location=user_location,
                 total_price=0 # Sẽ cập nhật sau khi tính item
             )
 

@@ -6,7 +6,8 @@ from django.db.models import Sum
 from django.contrib.gis.geos import Point
 from rest_framework.pagination import PageNumberPagination
 
-from ..models import Plant, Category, StoreBranch, StoreStock, SoilRegion, PlantImage
+from ..models import Plant, Category, StoreBranch, StoreStock, PlantImage
+from ..models.plant import SoilRegion
 from ..serializers import PlantSerializer, CategorySerializer, BranchSerializer
 
 # --- PHÂN TRANG CUSTOM ---

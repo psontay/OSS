@@ -9,9 +9,20 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class PlantSerializer(serializers.ModelSerializer):
     category_name = serializers.ReadOnlyField(source='category.name')
+    image = serializers.SerializerMethodField()
+    
     class Meta:
         model = Plant
         fields = '__all__'
+    
+    def get_image(self, obj):
+        """Build full URL cho image field"""
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
 
 # 2. Serializer cho Đơn hàng
 class OrderItemSerializer(serializers.ModelSerializer):

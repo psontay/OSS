@@ -10,6 +10,8 @@ from rest_framework.permissions import IsAdminUser
 @api_view(['GET'])
 # @permission_classes([IsAdminUser])
 def category_list_api(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return Response({"status": "error", "message": "Permission denied. Admin access required."}, status=status.HTTP_403_FORBIDDEN)
     """Lấy danh sách tất cả danh mục"""
     items = Category.objects.all().order_by('id')
     serializer = CategorySerializer(items, many=True)
@@ -21,6 +23,8 @@ def category_list_api(request):
 
 @api_view(['POST'])
 def category_create_api(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return Response({"status": "error", "message": "Permission denied. Admin access required."}, status=status.HTTP_403_FORBIDDEN)
     """Tạo mới một danh mục"""
     serializer = CategorySerializer(data=request.data)
     if serializer.is_valid():
@@ -37,15 +41,17 @@ def category_create_api(request):
     }, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'PATCH'])
+@api_view(['GET', 'PUT', 'PATCH'])
 def category_detail_api(request, pk):
-    """Xem chi tiết hoặc Cập nhật danh mục"""
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return Response({"status": "error", "message": "Permission denied. Admin access required."}, status=status.HTTP_403_FORBIDDEN)
     obj = get_object_or_404(Category, pk=pk)
 
     if request.method == 'GET':
         serializer = CategorySerializer(obj)
         return Response({"status": "success", "data": serializer.data})
 
-    # Cập nhật danh mục (Dùng PATCH để cập nhật từng phần cho linh hoạt)
+    # Cập nhật danh mục
     serializer = CategorySerializer(instance=obj, data=request.data, partial=True)
     if serializer.is_valid():
         serializer.save()
@@ -58,11 +64,12 @@ def category_detail_api(request, pk):
     return Response({"status": "error", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
+@api_view(['DELETE'])
 def category_delete_api(request, pk):
-    """Xóa danh mục"""
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return Response({"status": "error", "message": "Permission denied. Admin access required."}, status=status.HTTP_403_FORBIDDEN)
     obj = get_object_or_404(Category, pk=pk)
 
-    # Kiểm tra xem danh mục có đang chứa cây nào không (Ràng buộc dữ liệu)
     if obj.plant_set.exists():
         return Response({
             "status": "error",

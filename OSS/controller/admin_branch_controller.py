@@ -10,6 +10,8 @@ from rest_framework.permissions import IsAdminUser
 @api_view(['GET'])
 # @permission_classes([IsAdminUser]) # Mở ra khi bạn ông đã xử lý xong phần Token/Login
 def branch_list_api(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return Response({"status": "error", "message": "Permission denied. Admin access required."}, status=status.HTTP_403_FORBIDDEN)
     """Lấy danh sách tất cả chi nhánh"""
     items = StoreBranch.objects.all().order_by('-id')
     serializer = BranchSerializer(items, many=True)
@@ -20,6 +22,8 @@ def branch_list_api(request):
 
 @api_view(['POST'])
 def branch_create_api(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return Response({"status": "error", "message": "Permission denied. Admin access required."}, status=status.HTTP_403_FORBIDDEN)
     """Tạo mới chi nhánh"""
     serializer = BranchSerializer(data=request.data)
     if serializer.is_valid():
@@ -37,6 +41,8 @@ def branch_create_api(request):
 
 @api_view(['GET', 'PUT', 'PATCH'])
 def branch_detail_api(request, pk):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return Response({"status": "error", "message": "Permission denied. Admin access required."}, status=status.HTTP_403_FORBIDDEN)
     """Xem chi tiết hoặc Cập nhật một chi nhánh cụ thể"""
     obj = get_object_or_404(StoreBranch, pk=pk)
 
@@ -58,6 +64,8 @@ def branch_detail_api(request, pk):
 
 @api_view(['DELETE'])
 def branch_delete_api(request, pk):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return Response({"status": "error", "message": "Permission denied. Admin access required."}, status=status.HTTP_403_FORBIDDEN)
     """Xóa chi nhánh"""
     obj = get_object_or_404(StoreBranch, pk=pk)
     obj.delete()

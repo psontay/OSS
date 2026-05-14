@@ -78,17 +78,14 @@ def check_suitability_api(request):
 
         return Response({
             "status": "success",
+            "suitable": is_suitable,
+            "message": message,
             "data": {
-                "plant_name": plant.name,
-                "suitable": is_suitable,
-                "message": message,
-                "details": {
-                    "temp": f"{current_temp}°C",
-                    "ph": f"{actual_ph}",
-                    "humidity": f"{current_humidity}%",
-                    "soil_type": f"Sét {actual_clay}%",
-                    "elevation": f"{elevation}m"
-                }
+                "temp": f"{current_temp}°C",
+                "ph": f"{actual_ph}",
+                "humidity": f"{current_humidity}%",
+                "soil_type": f"Sét {actual_clay}%",
+                "elevation": f"{elevation}m"
             }
         })
 

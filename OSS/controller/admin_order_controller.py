@@ -10,11 +10,12 @@ from rest_framework.permissions import IsAdminUser
 @api_view(['GET'])
 # @permission_classes([IsAdminUser])
 def order_list_api(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return Response({"status": "error", "message": "Permission denied. Admin access required."}, status=status.HTTP_403_FORBIDDEN)
     """
     Lấy danh sách tất cả đơn hàng cho Admin
     """
     orders = Order.objects.all().order_by('-created_at')
-    # many=True vì trả về một danh sách
     serializer = OrderSerializer(orders, many=True)
 
     return Response({
@@ -25,6 +26,8 @@ def order_list_api(request):
 
 @api_view(['GET'])
 def order_detail_api(request, pk):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return Response({"status": "error", "message": "Permission denied. Admin access required."}, status=status.HTTP_403_FORBIDDEN)
     """
     Xem chi tiết một đơn hàng (bao gồm cả danh sách món hàng items)
     """
@@ -35,23 +38,22 @@ def order_detail_api(request, pk):
         "data": serializer.data
     })
 
-@api_view(['PATCH']) # Dùng PATCH vì mình chỉ cập nhật một trường duy nhất là 'status'
+@api_view(['PATCH'])
 def order_update_status_api(request, pk):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return Response({"status": "error", "message": "Permission denied. Admin access required."}, status=status.HTTP_403_FORBIDDEN)
     """
     Cập nhật trạng thái đơn hàng (Đang chờ -> Đang xử lý -> Đã giao...)
     """
     order = get_object_or_404(Order, pk=pk)
 
-    # Lấy status mới từ body JSON bạn ông gửi lên
     new_status = request.data.get('status')
-
     if not new_status:
         return Response({
             "status": "error",
             "message": "Thiếu thông tin trạng thái (status)!"
         }, status=status.HTTP_400_BAD_REQUEST)
 
-    # Ép kiểu hoa để đồng bộ với logic mình đã làm hôm trước
     order.status = new_status.upper()
     order.save()
 

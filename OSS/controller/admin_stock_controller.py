@@ -11,6 +11,8 @@ from rest_framework.permissions import IsAdminUser
 @api_view(['GET'])
 # @permission_classes([IsAdminUser])
 def stock_list_api(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return Response({"status": "error", "message": "Permission denied. Admin access required."}, status=status.HTTP_403_FORBIDDEN)
     """Lấy danh sách tồn kho của tất cả chi nhánh và sản phẩm"""
     stocks = StoreStock.objects.select_related('branch', 'plant').all().order_by('branch__name')
     serializer = StoreStockSerializer(stocks, many=True)
@@ -22,7 +24,16 @@ def stock_list_api(request):
 
 @api_view(['POST'])
 def stock_create_api(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return Response({"status": "error", "message": "Permission denied. Admin access required."}, status=status.HTTP_403_FORBIDDEN)
     """Tạo bản ghi kho mới (Gán một cây vào một chi nhánh)"""
+    quantity = request.data.get('quantity')
+    if quantity is not None and int(quantity) < 0:
+        return Response({
+            "status": "error",
+            "message": "quantity must be >= 0"
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
     serializer = StoreStockSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -36,6 +47,8 @@ def stock_create_api(request):
 
 @api_view(['GET', 'PATCH'])
 def stock_detail_api(request, pk):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return Response({"status": "error", "message": "Permission denied. Admin access required."}, status=status.HTTP_403_FORBIDDEN)
     """Xem hoặc cập nhật số lượng tồn kho"""
     stock = get_object_or_404(StoreStock, pk=pk)
 
@@ -49,6 +62,9 @@ def stock_detail_api(request, pk):
 
     if new_qty is None:
         return Response({"status": "error", "message": "Vui lòng cung cấp số lượng mới!"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if int(new_qty) < 0:
+        return Response({"status": "error", "message": "Số lượng mới phải >= 0"}, status=status.HTTP_400_BAD_REQUEST)
 
     # 1. Cập nhật vào DB
     stock.quantity = new_qty
@@ -76,6 +92,8 @@ def stock_detail_api(request, pk):
 
 @api_view(['DELETE'])
 def stock_delete_api(request, pk):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return Response({"status": "error", "message": "Permission denied. Admin access required."}, status=status.HTTP_403_FORBIDDEN)
     """Xóa một bản ghi kho (Cẩn thận khi dùng)"""
     stock = get_object_or_404(StoreStock, pk=pk)
     stock.delete()

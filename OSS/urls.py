@@ -23,7 +23,7 @@ from OSS.controller import (
 urlpatterns = [
     # --- 1. HỆ THỐNG MẶC ĐỊNH & LEGACY (Dành cho Web cũ hoặc Admin mặc định) ---
     path('admin/', admin.site.urls),
-    path('', store_controller.home, name='home'),
+    path('', store_controller.home_api, name='home'),
     path('about-us/', views.about_us, name='about_us'),
 
     # --- 2. API V1 (Dành cho bạn làm Frontend Framework - React/Vue/Mobile) ---
